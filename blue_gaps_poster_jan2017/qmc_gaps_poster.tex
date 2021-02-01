@@ -1,0 +1,269 @@
+\documentclass[hyperref={draft}, table, xcdraw]{beamer}
+\usepackage[size = a0, orientation = portrait, scale = 1.8]{beamerposter}
+\usepackage{tikz}
+\usepackage{floatrow}
+\usepackage{caption}
+
+% Theme
+\usetheme{Poster}
+\usecolortheme{Ryan_blue}
+
+% Number figures as per usual
+\setbeamertemplate{caption}[numbered]
+
+% Colours
+\definecolor{EmphCol}{HTML}{0F51E3}
+\setbeamercolor{caption name}{fg=black!70}
+
+% Fonts
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[libertine]{newtxmath}
+\usepackage[scaled = 0.9]{libertine}
+\usepackage[scaled = 0.75]{inconsolata}
+
+% Commands
+\newcommand{\red}[1]{{\bf\color{EmphCol}{#1}}}
+\newcommand{\ket}[1]{\lvert {#1} \rangle}
+\newcommand{\bra}[1]{\langle {#1} \rvert}
+\newcommand{\expt}[1]{\langle {#1} \rangle}
+
+\title{Quantum Monte Carlo Studies of Electronic Bandgaps \\
+ \large{\underline{\smash{Ryan Hunt}}$^1$,
+ Neil Drummond$^1$ \& Vladimir Fal'ko$^2$}
+  \\ \vspace{0.3cm}
+  \normalsize{$^1$Department of Physics, Lancaster University \\
+              $^2$National Graphene Institute, University of Manchester}}
+
+\author[]{\vspace{-0.3cm}\hspace{6.5cm}
+\large{Presenter e-mail : \framebox{\strut\ \texttt{r.hunt4@lancaster.ac.uk}\ \ $\lvert$
+                                          \ \texttt{ryan.hunt@postgrad.manchester.ac.uk}\ }}}
+
+\begin{document}
+
+% Images right and left of title - Logos
+\addtobeamertemplate{headline}{}
+{
+  \begin{tikzpicture}[remember picture,overlay]
+  \node [shift={(-9.5 cm, -7.2 cm)}] at (current page.north east) {\includegraphics[width=14cm]{figs/nownano-logo.png}};
+  \node [shift={( 9.5 cm, -7.2 cm)}] at (current page.north west) {\includegraphics[width=14cm]{figs/lan_logo.png}};
+  \end{tikzpicture}
+}
+
+\vfill
+
+\begin{frame}[fragile]
+\centering
+\vspace{-1.0cm}
+\begin{columns}[T]
+
+% Main Left Column
+\begin{column}{.001\textwidth}
+\end{column}
+\begin{column}{.47\textwidth}
+
+\begin{block}{{\bf\large Introduction}}
+\begin{itemize}
+  \item Quantum Monte Carlo (QMC) methods offer an accurate means of probing
+  both the \red{ground} and \red{excited state} properties of semiconductors
+  from first-principles.
+  \item In this series of projects, we have benchmarked the predictive power of
+  QMC - and proven that the method can be successfully applied in
+  \red{numerous} cases of interest.
+
+\end{itemize}
+\end{block}
+
+\begin{block}{{\bf\large QMC Methods}}
+\begin{itemize}
+  \item In Variational MC, trial many-e$^-$ wavefunctions $\Psi_T({\bf R})$ are
+  formed from \red{Slater} determinants $\mathcal{D}({\bf R})$ and
+  \red{Jastrow} factors $e\ ^{\text{J}({\bf R})}$
+  \begin{equation}
+  \Psi_T({\bf R}) = e\ ^{\text{J}({\bf R})}\mathcal{D}({\bf R}).
+  \end{equation}
+  The Jastrow exponent J depends on parameters, which are \red{optimised} by
+  stochastic techniques.
+
+  \item In Diffusion MC, $\ket{\Psi_T}$ is evolved in imaginary time - with
+  excited states dying away exponentially
+  \begin{equation}
+    \ket{\Psi^{\text{DMC}}(\tau)} =
+    \sum^{\infty}_{i=0}c_i
+    \ \mathrm{e}^{-(\epsilon_i - E_T)\tau}\ket{\Phi_i(0)}.
+  \end{equation}
+
+  \item Excited state DMC is non-trivial, and energies are not always
+  variational [1]. In our work, the \red{nodes} of $\Psi_T({\bf R})$ are fixed
+  and the \red{topology} of the (fixed) nodal surface determines energies.
+\end{itemize}
+\end{block}
+
+\begin{block}{{\bf\large Which Gap...?}}
+\begin{itemize}
+  \item The \red{quasiparticle} gap is defined as
+  \begin{equation}
+    \Delta_{QP} = E_{N+1} + E_{N-1} - 2 E_N,
+  \end{equation}
+
+  \item The \red{excitonic} gap is defined as
+  \begin{equation}
+    \Delta_{Ex} = E^{+}_{N} - E_N,
+  \end{equation}
+
+  \item Their difference is the \red{exciton binding}, $E_X =
+  \Delta_{QP} - \Delta_{Ex}$.
+
+\end{itemize}
+\end{block}
+
+\begin{block}{{\bf\large Molecular Systems$^{[3]}$}}
+  \begin{itemize}
+  \item We have calculated the QP gaps of several small molecules, incl.
+  \red{Anthracene}, via QMC.
+
+  \begin{figure}[H]
+    \floatbox[{\capbeside\thisfloatsetup{capbesideposition={left, center},capbesidewidth=0.5\textwidth}}]{figure}[\FBwidth]
+    {\caption{The (DFT-relaxed) structure of Anthracene, a molecule of interest
+    in molecular electronics.}\label{fig:anth}}
+    {\includegraphics[width=0.4205\textwidth]{figs/anth.png}}
+  \end{figure}
+
+  \begin{table}[H]
+  \centering
+  \begin{tabular}{|c||cccc
+  >{\columncolor[HTML]{6BCEF6}}c |}
+  \hline
+  Method &\ Expt. &\ DFT-LDA &\ $G_0W_0^{\star}$ &\ $GW$ &\ DMC \\ \hline \hline
+  $\Delta_{QP}$ / eV&\ 6.9 &\ 2.25 &\ 6.15-6.86 &\ 6.74 &\ 6.89(6) \\ \hline
+  \end{tabular}
+  \caption{Experimental and theoretical $\Delta_{QP}$ for Anthracene ($GW$ from
+  [2]). \\$^{\star}$ These gaps are orbital dependant.}
+  \label{anth-qpg}
+  \end{table}
+
+  \item \red{Potential caveats:} Jahn-Teller effect, phonon renormalisation -
+  each of these could affect our (static-nucleus) results.
+
+  \end{itemize}
+
+\end{block}
+
+\end{column}
+
+\hfill
+
+% Main Right Column
+\begin{column}{.47\textwidth}
+
+\begin{block}{{\bf\large Boron Nitride$^{[4]}$}}
+\begin{itemize}
+\item We have calculated both the \red{excitonic} and \red{quasiparticle} gaps
+of bulk and monolayer hBN.
+
+
+\begin{figure}[H]
+  \floatbox[{\capbeside\thisfloatsetup{capbesideposition={left, center},capbesidewidth=0.4\textwidth}}]{figure}[\FBwidth]
+  {\caption{An example (288 e$^-$) supercell used in our
+  bulk simulations.}\label{fig:bhbn}}
+  {\includegraphics[width=0.55\textwidth]{figs/bhbn.png}}
+\end{figure}
+
+\item \red{Main Point:} Gaps are \red{strongly} enhanced in the monolayer
+
+\begin{table}[H]
+\centering
+\vspace{0.2cm}
+\caption{A subset of our hBN results. The calculated monolayer exciton binding
+is $2.0(3)$ eV, with the bulk value to be determined.}
+\label{hbn_table}
+\begin{tabular}{|c||cc|}
+\hline
+System $\rightarrow$ &\ \ \  Bulk \ \ &\ \ \ Monolayer \ \ \\ \hline \hline
+\ $\Delta_{Ex}(K_v \rightarrow K_c)$ / eV\ \ \ &\ \ \ $5.8(1)$ & 8.7(3)  \\
+\ $\Delta_{Ex}(K_v \rightarrow \Gamma_c)$ / eV\ \ \ &\ \ $5.69(8)$ & 7.5(3)  \\ \hline
+\end{tabular}
+\end{table}
+
+\item First QMC gap calculation for a \red{layered}, and a \red{2D} material.
+\item First analysis of \red{finite size effects} in QMC energy gaps.
+\end{itemize}
+
+\end{block}
+
+
+\begin{block}{{\bf\large Bulk Silicon {\it\large et al.}$^{[3]}$}}
+\begin{itemize}
+\item Silicon in the diamond structure is perhaps {\it the} most widely
+studied semiconductor.
+\begin{figure}[H]
+
+  \centering
+  \includegraphics[width=0.604\textwidth, angle = 0]{figs/si.png}
+  \caption{An example (216 e$^-$) supercell used in our simulations.}
+  \label{bhbn_332}
+
+\end{figure}
+
+\item Our ongoing simulations hope to act as thorough benchmarks of the DMC
+method as used in gap calculations.
+
+\item We have also opted to study cubic BN and $\alpha$-SiO$_2$. Both have
+sizeable gaps, and cubic BN hosts a well-bound exciton.
+
+\end{itemize}
+\end{block}
+
+
+\begin{block}{{\bf\large Conclusions}}
+\begin{itemize}
+\item QMC methods are robust and accurate, and may be used to calculate energy
+gaps for semiconductors of any dimensionality.
+\item QMC is also capable of describing systems bonded by a variety of means -
+including by van der Waals interactions.
+\end{itemize}
+\end{block}
+
+\begin{block}{{\bf\large Acknowledgements}}
+\begin{itemize}
+\item QMC calculations were performed with the \red{\textsc{CASINO}} code, and
+DFT trial wavefunctions were obtained with \red{\textsc{CASTEP}}.
+\item All calculations were performed on the \red{HEC} facility at Lancaster
+and the \red{N8 HPC}.
+\end{itemize}
+\end{block}
+\end{column}
+\end{columns}
+
+\begin{center}
+\hfill
+\begin{minipage}{0.976\textwidth}
+\begin{block}{{\bf\large References}}
+\begin{columns}[T]
+
+
+% Left Column
+\begin{column}{.48\textwidth}
+\begin{enumerate}
+\item Foulkes, W. M. C., {\it et al.} PRB {\bf 60} (1999): 4558.
+\item Blase, X., {\it et al.} PRB {\bf 83} (2011): 115103.
+\end{enumerate}
+\end{column}
+\hfill
+% Right Column
+\begin{column}{.48\textwidth}
+\begin{enumerate}
+\setcounter{enumi}{2}
+\item Hunt, R. J., Drummond, N. D. Manuscript in preparation, (2016).
+\item Hunt, R. J., {\it et al.} Manuscript in preparation, (2016).
+\end{enumerate}
+\end{column}
+\end{columns}
+\end{block}
+\end{minipage}
+\end{center}
+
+\end{frame}
+
+\end{document}
+

@@ -1,0 +1,421 @@
+% *{{ Actual preamble
+% *{{ preamble
+\documentclass[10pt, pdf, hyperref={draft}, usenames, dvipsnames]{beamer}
+\usepackage{libertine,textcomp,amssymb,wasysym,color,ulem,verbatim,calc,tikz}
+\usepackage{floatrow,subcaption,appendixnumberbeamer,dcolumn,booktabs,multirow}
+\usenavigationsymbolstemplate{}
+\usepackage[T1]{fontenc}
+\setbeamertemplate{caption}[numbered]
+
+\newcolumntype{d}[1]{D{.}{.}{#1}}
+\newcommand\mc[1]{\multicolumn{1}{c}{#1}}
+
+% }}*
+
+% *{{ item colouring and themes
+\usecolortheme{beaver}
+\setbeamercolor{item}{fg=LancsRed}
+\setbeamercolor{structure}{fg=black}
+\definecolor{LancsRed}{HTML}{B5121B}
+\setbeamercolor{subsection in toc}{fg=gray}
+\setbeamercolor{bibliography entry note}{fg=black}
+\setbeamercolor{bibliography entry title}{fg=black}
+\setbeamercolor{bibliography entry author}{fg=LancsRed}
+
+
+
+\setbeamertemplate{frametitle}{\nointerlineskip
+    \begin{beamercolorbox}[wd=\paperwidth,ht=2.75ex,dp=1.375ex]{frametitle}
+        \hspace*{2ex}\insertframetitle \hfill
+        {\raisebox{1mm}{\textcolor{gray}{\small$\langle$\ \insertframenumber\
+        of
+        \inserttotalframenumber\ $\rangle$}}} \hspace*{1ex}%
+    \end{beamercolorbox}}
+
+\newcommand{\gitem}[1]{\setbeamercolor{item}{fg=ForestGreen}\item[$\checkmark$] #1}
+\newcommand{\bitem}[1]{\setbeamercolor{item}{fg=LancsRed}\item[$\times$] #1}
+\newcommand{\nitem}[1]{\setbeamercolor{item}{fg=NavyBlue}\item[$-$] #1}
+% }}*
+
+% *{{ margins
+\setbeamersize{text margin left=5mm, text margin right=5mm}
+% }}*
+
+% *{{ niceties
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\e}{\mathrm{e}}
+\newcommand{\ket}[1]{\lvert{#1}\rangle}
+\newcommand{\bra}[1]{\langle{#1}\rvert}
+\newcommand{\expt}[1]{\langle{#1}\rangle}
+\newcommand{\red}[1]{{\bf\color{LancsRed}{#1}}}
+\newcommand{\blue}[1]{{\bf\color{NavyBlue}{#1}}}
+\newcommand{\green}[1]{{\bf\color{ForestGreen}{#1}}}
+\newcommand{\orange}[1]{{\bf\color{BurntOrange}{#1}}}
+\newcommand{\mred}[1]{{\color{LancsRed}{#1}}}
+\newcommand{\mblue}[1]{{\color{NavyBlue}{#1}}}
+\newcommand{\mgreen}[1]{{\color{ForestGreen}{#1}}}
+\newcommand{\morange}[1]{{\color{BurntOrange}{#1}}}
+\newcommand{\kfr}{{\bf k}_{\rm f}}
+\newcommand{\kto}{{\bf k}_{\rm t}}
+\let\OLDitemize\itemize
+\renewcommand\itemize{\OLDitemize\addtolength{\itemsep}{5pt}}
+% }}*
+
+% *{{ title, subtitle, inst., date
+\title{{\LARGE The electron gas in doped 2D semiconductors}}
+
+\institute[]{\normalsize
+  Ryan Hunt \\
+  CMT Seminar \\
+  20$^{\text{th}}$ June
+}
+
+\date{}
+
+% }}*
+
+% *{{ bibliography setup
+\usepackage[backend=biber, style=phys]{biblatex}
+\bibliography{refs}
+\renewcommand{\footnotesize}{\scriptsize}
+\AtEveryCitekey{\clearfield{title}
+                \clearfield{pagetotal}
+                \clearfield{pages}
+                \clearfield{doi}}
+\renewcommand*{\bibfont}{\footnotesize}
+
+% }}*
+
+% *{{ graphics on front page
+\titlegraphic{\includegraphics[width=4cm]{figs/lan_logo.png}
+\hfill\includegraphics[width=4cm]{figs/nownano_logo.png}}
+
+% }}*
+
+% *{{ titlepage + toc
+
+% Section and subsections will appear in the presentation overview
+% and table of contents.
+
+\begin{document}
+
+\begin{frame}[plain]
+  \titlepage
+\end{frame}
+% }}*
+
+% }}* End Preamble
+
+% *{{ Problem
+
+\begin{frame}{Problem}
+\begin{itemize}
+  \item Consider the conventional 2DEG. The electrostatic field at the
+  interface between two similar materials w/ different single-particle
+  energetics binds electrons.
+\end{itemize}
+
+\begin{figure}[H]
+  \floatbox[{\capbeside\thisfloatsetup{capbesideposition={left, center},
+  capbesidewidth=0.4\textwidth}}]{figure}[\FBwidth]
+  {\caption{An AlGaAs/GaAS MODFET. Blue and purple are supposed to represent
+  material \textit{similarities}.}\label{fig:modfet}}
+  {\includegraphics[width=0.4\textwidth]{figs/modfet.pdf}}
+\end{figure}
+
+\begin{itemize}
+  \item Point is that the ``layer'' and the ``bulk'' are similar.
+  \item e$^{-}$ move in 2D, interact as 3D
+  ($V(r)\sim1/r$).\footfullcite{Ando1982}$^{,}$\footnote{~~The blue and purple
+  bits are similar for a wide range of aluminium fractions - in $a$, and in
+  $\epsilon_r$.}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Problem (cont.)}
+
+\begin{itemize}
+
+  \item What if the e$^{-}$ behaved a little bit more as if they \textit{were
+  really} in 2D\ldots?
+  \item Solve $\nabla^{2}\phi = 4\pi\rho $ in 2D, and find
+  $V(r)\sim-\text{ln}{(r)}$.\footnote{~~Hartree atomic units, throughout.} But
+  this is unphysical.
+  \item What IS physical is a finitely-thick (ultimately, atomically thin)
+  slab.
+
+  \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\linewidth]{figs/kel.png}
+  \end{figure}
+
+\end{itemize}
+\end{frame}
+
+% }}*
+
+% *{{ Keldysh interaction
+\begin{frame}{Keldysh Interaction}
+  \begin{itemize}
+    \item In the atomically flat limit, one can show that
+  \end{itemize}
+\begin{equation}
+  V({\boldsymbol\rho}) = V_{\text{K}}({\boldsymbol\rho}) =
+  \dfrac{\pi}{2r_{\star}} \left[ H_{0}\left(\frac{r}{r_{\star}}\right) -
+  Y_{0}\left(\frac{r}{r_{\star}}\right) \right].
+\end{equation}
+\begin{itemize}
+  \item The parameter $r_{\star} = \kappa/(2\epsilon_{r})$ is a kind of
+  screening length.\footnote{~~$\kappa=d(\epsilon+1)$ is the in-plane
+  susceptibility.}
+\end{itemize}
+
+\begin{figure}[H]
+  \floatbox[{\capbeside\thisfloatsetup{capbesideposition={left, center},
+  capbesidewidth=0.3\textwidth}}]{figure}[\FBwidth]
+  {\caption{The Keldysh and Coulomb interactions compared.}\label{fig:kelint}}
+  {\includegraphics[width=0.4\textwidth]{figs/kelint.pdf}}
+\end{figure}
+\end{frame}
+% }}*
+
+% *{{ Physics and experiments / studies
+\begin{frame}{Physical Picture}
+Consider a 2D TMDC;
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\linewidth]{figs/tmd.pdf}
+\end{figure}
+\begin{center}
+  (+ the remaining valence!)
+\end{center}
+\end{frame}
+% }}*
+
+% *{{ Theory
+
+\begin{frame}{Our Model - Keldysh Jellium - ``Kellium''}
+  \begin{itemize}
+    \item Model the conduction electrons in a doped 2D semiconductor as being
+    quasiparticles whose interactions are of Keldysh form,
+    \begin{equation}
+      \mathcal{\hat H} = -\dfrac{1}{2m} \sum_{i} \nabla_{i}^{2} + \sum_{\langle
+      i,j \rangle} V_{\text{K}}(\lvert {\boldsymbol\rho}_{i}-{\boldsymbol\rho}_{j} \rvert).
+    \end{equation}
+    \item The effect of the core electrons, and the nuclei, are then tied up in
+    $r_{\star}$ and the effective mass $m$ (parameters!).
+    \item Could do this \textit{ab initio} - but at huge cost.\footnote{~~Not
+    just huge because QMC - but rather electron density fixing means big
+    supercells.}
+  \end{itemize}
+\end{frame}
+
+% }}*
+
+% *{{ Solution
+\begin{frame}{Solving our model}
+
+\begin{itemize}
+  \item As written, $\mathcal{\hat H}$ defines an infinite system of electrons.
+  \item We're going to have to put finitely many of them in a finite box,
+  instead, and invoke periodic boundary conditions.
+  \begin{equation}
+    \sum_{\langle i,j \rangle} \rightarrow \sum_{\bf R}\sum_{\langle i,j \rangle}
+  \end{equation}
+  \item Incur a finite-size effect, but one which is controllable. More
+  worryingly, lattice sums over long-ranged sums are \textbf{conditionally}
+  convergent.
+  \item The Ewald method cures this problem.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Ewaldised Keldysh interaction}
+  \begin{itemize}
+    \item The Keldysh interaction is not the same as the Coulomb interaction.
+    The Ewald method isn't directly applicable. Time to add zero:
+    \begin{equation}
+      V_{\text{K}}({\boldsymbol\rho})=V_{\text{C}}({\boldsymbol\rho}) + \left[
+      V_{\text{K}}({\boldsymbol\rho})-V_{\text{C}}({\boldsymbol\rho}) \right].
+    \end{equation}
+    \item First term summed by Ewald method. Second term is
+    $\mathcal{O}(r^{-3})$ at long range. Has an \textbf{absolutely} convergent
+    lattice sum. Also need to \orange{maintain $\langle V \rangle_{A}$}, so finally
+    \begin{align}
+      \sum_{\bf R}
+      V_{\text{K}}(|{\boldsymbol\rho}_i -{\boldsymbol\rho}_j-{\bf R} |) =
+      \orange{\dfrac{2\pi r_{\star}}{A}} +
+      V^{\text{Ewald}}_{\text{C}}({\boldsymbol\rho}_i,{\boldsymbol\rho}_j)
+      +\nonumber \\ \sum_{\bf R}\left[ V_{\text{K}}(
+      |{\boldsymbol\rho}_i -{\boldsymbol\rho}_j-{\bf R} |)-
+      V_{\text{C}}(|{\boldsymbol\rho}_i-{\boldsymbol\rho}_j-{\bf R} |)\right].
+    \end{align}
+    \item Can just pre-compute the big sum on a B-spline
+    grid,\footnote{~~Spanning possible range of ${\boldsymbol\rho}_{i,j}$.} and
+    interpolate at calculation runtime.\footnote{~~Almost, we need to think
+    about short-range.}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{What will we study in particular?}
+\begin{block}{For now: Wigner Crystallization}
+\begin{itemize}
+  \item In a 2D semiconductor, what is the expected crystallization density?
+  \begin{itemize}
+    \item Hamiltonian qualitatively same as 2D HEG. Same argument of Wigner
+    applies, ${\hat T}$, ${\hat V}$ compete as fn.~of $r_s$.
+  \end{itemize}
+\end{itemize}
+\end{block}
+
+\begin{figure}[H]
+  \floatbox[{\capbeside\thisfloatsetup{capbesideposition={left, center},
+  capbesidewidth=0.3\textwidth}}]{figure}[\FBwidth]
+  {\caption{Spin-valley locked spin density in a striped antiferromagnetic
+  WC. (left) up-spin, K valley quasielectrons, (right) down-spin, K' valley
+  quasielectrons.}\label{fig:test}}
+  {\includegraphics[width=0.6\textwidth]{figs/test.png}}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}{Quantum Monte Carlo calculations}
+
+
+We use Variational and Diffusion (VMC/DMC) Quantum Monte Carlo methods, with
+trial wave functions of form:
+
+\vfill
+
+\begin{itemize}
+  \item Wigner Crystal Phases: \green{determinants} of a series of
+  site-centered Gaussian orbitals.
+
+  \item Fluid Phases: \green{determinants} of plane waves, with wave vectors defined by
+  system size (quantization conditions).
+\end{itemize}
+
+\vfill
+
+These are multiplied by \blue{Jastrow} correlation factors, and we also make use of
+\orange{backflow} transformations of coordinates,
+
+\begin{equation}
+  \Psi({\bf R}) = \blue{\exp{\left[\mathcal{J}({\bf R})\right]}}\cdot
+  \green{\mathcal{D}\left[\orange{{\boldsymbol\xi({\bf R})}}\right]}.
+\end{equation}
+
+\textbf{Aside}: $\exp{\left[\mathcal{J}({\bf R})\right]}$ allows us to satisfy the cusp
+conditions on particle pairs (when ${\bf r}_{ij} \rightarrow 0$, wfn.~must go
+to 0 in a particular way). These conditions are \textit{different} under the
+Keldysh interaction and require a \textit{bespoke} periodic Jastrow term.
+
+\end{frame}
+
+% }}*
+
+% *{{ To-do list, wish list
+
+\begin{frame}{To Do}
+
+\begin{block}{Lots\ldots}
+ \begin{figure}[H]
+   \centering
+   \includegraphics[width=0.5\linewidth]{figs/wip.jpg}
+ \end{figure}
+\end{block}
+
+\end{frame}
+
+\begin{frame}{To Do (contd.)}
+
+  \begin{block}{DMC calculations: latest tech}
+    \begin{itemize}
+      \item Ruggeri \textit{et al.} tricks? (Recent seminar by PLR on electron gas to
+      meV accuracy\ldots)
+      \item 2DEG-like Fermi surface necessitates twist-averaging.
+      \item Can we physically motivate new FS extrapolation formulae?
+      \begin{itemize}
+        \item E.g.~does Kellium have a Gell-Mann--Brueckner formula? (does it need to?)
+      \end{itemize}
+    \end{itemize}
+  \end{block}
+
+  \begin{block}{Holes at finite density (probably someone elses job)}
+    \begin{itemize}
+      \item If had $\epsilon(r_s|r_{\star})$, could evaluate e-h correlation
+      energy at finite e-density (finite-density excitonic effects!).
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+% }}*
+
+% *{{ The breakdown of our model
+\begin{frame}{Failure of the Model}
+Seeing as we're all friends, let's talk about where this model will
+fail.
+\begin{minipage}[t]{0.60\textwidth}
+
+\begin{itemize}
+  \item $\exists$ a critical density (at $T=0$K) where the spin-split band
+  will fill. This is the onset of true 2 valley, 2 spin dynamics, on two energy
+  scales (separated by $\Delta_{\sigma C}$).\footnotemark
+  \item $\exists$ a density beyond this where ultra-short-range (inter-valley)
+  effects are important, and \ldots
+  \item The effective mass approximation itself breaks down when we talk about
+  inter-particle distances of order a lattice constant.
+\end{itemize}
+
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.3\textwidth}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{figs/laundry.png}
+\end{figure}
+
+\end{minipage}%
+\footnotetext{~~Or, a given $T$, for some density, where thermal fluctuations
+might populate these levels significantly anyway\ldots $\sim
+4\times10^{12}\text{cm}^{-2}$ in \textbf{encapsulated} MoS$_2$, Pisoni \textit{et al.}}
+\vfill
+$\implies$ model reasonable at intermediate/low density.
+\end{frame}
+
+\begin{frame}{Failure of the Model (cont.)}
+\begin{block}{Questions}
+\begin{itemize}
+  \item Will there ever be a clean enough sample to observe a crystallisation
+  transition in a 2D SC? \textcolor{gray}{Pessimistic -
+  $n\sim10^{11}\text{cm}^{-2}$.}
+  \item At what density do we have a crossover from isolated trion behaviour to
+  a collective state in a 2D SC? \textcolor{gray}{Dunno. Efimkin/MacDonald
+  suggest almost immediately.\footnote{~~But study huge densities\ldots} Spink \textit{et al.} HEG calculations disagree.}
+  \item Can the Ewald-Keldysh interaction apply in other scenarios? Notably,
+  may it realistically describe superfluid phases in gated bilayer VdW
+  systems? \textcolor{gray}{Probably - if I had more time I'd tinker with this.}
+\end{itemize}
+\end{block}
+\end{frame}
+
+% }}*
+
+% *{{ End
+
+\begin{frame}
+Acknowledgements:
+\begin{itemize}
+  \item Neil
+\end{itemize}
+\vfill
+\begin{center}
+  {\Large Thanks!}
+\end{center}
+\vfill
+\end{frame}
+
+\end{document}
+% }}*

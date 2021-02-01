@@ -1,0 +1,1227 @@
+% *{{ All Setup
+% *{{ preamble
+\documentclass[12pt, pdf, hyperref={draft}, usenames, dvipsnames,
+aspectratio=169]{beamer}
+\usepackage{libertine, textcomp, amssymb, wasysym, color, ulem, verbatim}
+\usepackage{floatrow, subcaption}
+% hide controls
+\usenavigationsymbolstemplate{}
+\usepackage[T1]{fontenc}
+\synctex=1
+\setbeamertemplate{caption}[numbered]
+\setlength\fboxrule{1.5pt}
+% can use later to change the margin size, if want.
+% \setbeamersize{text margin left=10pt,text margin right=10pt}
+\usepackage{tikzsymbols}
+
+% }}*
+
+% *{{ item colouring and themes
+\usecolortheme{beaver}
+\setbeamertemplate{footline}[frame number]
+\definecolor{LancsRed}{HTML}{B5121B}
+\setbeamercolor{item}{fg=LancsRed}
+\setbeamercolor{title}{fg=LancsRed}
+\setbeamercolor{structure}{fg=LancsRed}
+\setbeamercolor{frametitle}{fg=LancsRed}
+\setbeamercolor{footnote mark}{fg=LancsRed}
+\setbeamercolor{footnote}{fg=LancsRed}
+\setbeamercolor{bibliography entry author}{fg=LancsRed}
+\setbeamercolor{bibliography entry title}{fg=black}
+\setbeamercolor{bibliography entry note}{fg=black}
+\setbeamercolor{section in toc}{fg=LancsRed}
+%\setbeamercolor{subsection in toc}{fg=gray}
+\newcommand{\gitem}[1]{\setbeamercolor{item}{fg=ForestGreen}\item[$\checkmark$] #1}
+\newcommand{\bitem}[1]{\setbeamercolor{item}{fg=LancsRed}\item[$\times$] #1}
+\newcommand{\nitem}[1]{\setbeamercolor{item}{fg=NavyBlue}\item[$-$] #1}
+% }}*
+
+% *{{ niceties
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\e}{\mathrm{e}}
+\newcommand{\ket}[1]{\lvert{#1}\rangle}
+\newcommand{\bra}[1]{\langle{#1}\rvert}
+\newcommand{\expt}[1]{\langle{#1}\rangle}
+\newcommand{\red}[1]{{\bf\color{LancsRed}{#1}}}
+\newcommand{\blue}[1]{{\bf\color{NavyBlue}{#1}}}
+\newcommand{\green}[1]{{\bf\color{ForestGreen}{#1}}}
+\newcommand{\pt}{\Psi_{\text{T}}}
+\newcommand{\tpt}{{\tilde\Psi}_{\text{T}}}
+
+% }}*
+
+% *{{ title, subtitle, inst., date
+\title{Optimisation of Many-Electron Wave Functions}
+\subtitle{QMC in the Apuan Alps 2017}
+
+% authors and institutions
+%\author{\emph{Ryan J. Hunt}\inst{1},
+%        Neil D. Drummond\inst{1} \\
+%        and Vladimir I. Fal'ko\inst{2}}
+
+\author{Ryan J. Hunt\\
+        Lancaster University}
+
+%\institute[]{
+%
+%  \inst{1}
+%  Department of Physics,\\
+%  Lancaster University
+%  \and
+%
+%  \inst{2}
+%  National Graphene Institute,\\
+%  University of Manchester}
+%
+% date
+\date{2$^{\text{nd}}$ August 2017}
+
+% }}*
+
+% *{{ bibliography setup
+\usepackage[backend=bibtex, style=phys]{biblatex}
+\bibliography{opt_refs}
+\renewcommand{\footnotesize}{\scriptsize}
+\AtEveryCitekey{\clearfield{title}
+                \clearfield{pagetotal}
+                \clearfield{pages}}
+\renewcommand*{\bibfont}{\footnotesize}
+% }}*
+
+% *{{ graphics on front page
+\titlegraphic{\vspace*{-2.5cm}\includegraphics[width=3cm]{figs/lan_logo.png}
+\hfill\includegraphics[width=3cm]{figs/nownano_logo.png}}
+
+% }}*
+
+% *{{ titlepage + toc
+
+% Section and subsections will appear in the presentation overview
+% and table of contents.
+
+\begin{document}
+
+\begin{frame}[plain]
+  \titlepage\end{frame}
+
+%\begin{frame}{Outline}
+%  \tableofcontents
+%\end{frame}
+
+% contents at ssubsection starts - comment to get rid
+\AtBeginSection[]
+{\begin{frame}<beamer>{Outline}
+  \tableofcontents[currentsection,subsubsectionstyle=hide]
+  \end{frame}}
+
+% }}*
+
+% }}* end of setup
+% *{{ COLOURS
+%  Blue  -> make a point
+%  Red   -> technical term
+%  Green -> good conclusion or observation
+% }}*
+
+\setlength\abovedisplayskip{3pt}
+\setlength\belowdisplayskip{3pt}
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+\section{Introduction}\label{sec:introduction}
+
+\begin{frame}{Introduction}
+\begin{itemize}
+  \item Trial wave functions are at the heart of QMC.\ \green{Good} trial wave
+  functions are at the heart of \green{good} QMC studies.
+  \item QMC wave functions take some approximate starting point\footnote{\ Or,
+  in rare cases, a known-good pen-and-paper starting point.} (usually from a
+  DFT code), and add some \blue{exploitable variational freedom}.
+  \item The QMC wave function fundamentally differs from the DFT wave function
+  - it is \blue{explicitly correlated}.
+  \item In this talk, I aim to expose:
+  \begin{enumerate}
+    \item How we add \blue{variational freedom}.
+    \item How we \green{exploit} it to make our trial wave functions better.
+  \end{enumerate}
+\end{itemize}
+\end{frame}
+
+
+\section{Antisymmetric Wave Functions}\label{sec:antisymm_wfns}
+
+
+\begin{frame}{Antisymmetric Wave Functions}
+\begin{itemize} \item Consider a general many-electron wave function
+\begin{equation}
+  \Psi_{S}({\bf X}) = \Psi(\{ {\bf r}_1, s^{z}_1  \},\ldots,\{ {\bf r}_{N_e},
+  s^{z}_{N_e} \}),
+\end{equation}
+  for a system of $N_e$ electrons, having positions $\{ {\bf r}_i \}$ and spin
+  projections $\{s^z_i\}$. Let $\Psi_{S}({\bf X})$ be an eigenfunction of
+  $\hat S=\sum_i \hat s^{z}_i$.\footnote{\ With eigenvalue $\sum_i s^{z}_i =
+  (N_{\uparrow} - N_{\downarrow})/2$.}
+  \item Exact ground-states are eigenfunctions of $\hat S$ all cases where
+  $\mathcal{\hat H}$ is \blue{spin-independent}.
+  \item A generic\footnote{\ OK, $\mathcal{\hat O}$ has to be spin independent.}
+  expectation value then reads
+  \begin{equation}
+    \mathcal{O} = \dfrac{\bra{\Psi_{S}} \mathcal{\hat O}  \rvert \Psi_{S}
+    \rangle }{\bra{\Psi_{S}} \Psi_{S} \rangle} = \dfrac{\sum_{\{ s^z \}}\int\dd
+    {\bf R}\ \Psi^{\star}_{S}({\bf X}) \mathcal{\hat O}({\bf R}) \Psi_{S}({\bf
+    X})} {\sum_{\{ s^z \}}\int\dd {\bf R}\ \lvert\Psi_{S}({\bf X})\rvert^2}.
+  \end{equation}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Antisymmetric Wave Functions (II)}
+\begin{itemize}
+  \item Remember, $\Psi_{S}({\bf X})$ is antisymmetric under exchange of two
+  \textit{identical} electrons (same-spin electrons).
+  \item We can order the arguments of $\Psi_{S}$ any way we like: let's choose
+  a new argument
+  \begin{equation}
+    {\bf X}' = ( \{ {\bf r}_{i_1}, \uparrow \}, \ldots, \{ {\bf
+    r}_{N_\uparrow}, \uparrow \}, \{ {\bf r}_{N_{\uparrow}+1}, \downarrow \},
+    \ldots, \{ {\bf r}_{N_e}, \downarrow  \}),
+  \end{equation}
+  leaves expectation values unchanged (permutation to return to ${\bf X}$ has
+  parity $\pm1$ - both square to one).
+  \item We can relabel the $i_n \rightarrow n$, as these are integration
+  variables, and cancel the spin sums to obtain
+  \begin{equation}
+    \mathcal{O} = \dfrac{\int\dd {\bf R}\ \Psi^{\star}({\bf R})
+    \mathcal{\hat O}({\bf R}) \Psi({\bf R})}{\int\dd {\bf R}\ \lvert
+    \Psi({\bf R}) \rvert^2},\quad \underbrace{\Psi({\bf R})
+    \equiv \Psi_{S}({\bf X'})}_{\text{``The trial wave function''}}
+  \end{equation}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Antisymmetric Wave Functions (III)}
+\begin{itemize}
+  \item $\Psi({\bf R})$ is only antisymmetric w.r.t.\ exchange of
+  \blue{indistinguishable} electrons.
+  \item $\Psi({\bf R})$ is \green{easier to work with}, and we suffer no loss of
+  generality by doing this (given $\Psi({\bf R})$, we can recover
+  $\Psi_{S}({\bf X})$).
+  \item Non-collinear spins? See Sec. 37.2 CASINO manual, and
+  ``3D\_fluid\_sdw'' CASINO example.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Antisymmetric Wave Functions (IV)}
+\begin{itemize}
+  \item Is $\Psi({\bf R})$ real? \red{Generally, no}. However, if the system you are
+  studying has time-reversal symmetry ($\mathcal{\hat H}$ is real, with
+  sensible b.c.'s), you can always \green{choose} $\Psi({\bf R})$ real.
+  \item CASINO can handle both (``complex\_wf'' keyword). Real wave functions
+  are usually preferred, because real arithmetic is \green{faster}.
+  \item Cases where one might want a complex wave function include:
+  \begin{itemize}
+    \item Magnetic field ${\bf B} \neq {\bf 0}$.
+    \item Calculations for solids where {\bf k}-point grid has no inversion
+    symmetry.
+    \item Speed testing?
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+
+\subsection{The Slater-Jastrow Wave Function}\label{sub:the_sj_wave_function}
+
+\begin{frame}{Slater-Jastrow Wave Functions}
+\begin{itemize}
+  \item So far we have considered generalities. Most QMC studies employ the
+  \blue{Slater-Jastrow} wave function form
+  \begin{equation}
+    \Psi_{\text{SJ}}({\bf R}) = \exp{\left[ \mathcal{J}({\bf R}) \right]}
+    \cdot \underbrace{\sum_j \alpha_j \mathcal{D}^{\uparrow}_{j}({\bf R})
+    \mathcal{D}^{\downarrow}_{j}({\bf R})}_{\text{``The Slater Part''}},
+  \end{equation}
+  where $\exp{\left[ \mathcal{J}({\bf R}) \right]}$ is the \blue{Jastrow
+  factor}, $\{ \alpha_j \}$ are (potential) multideterminantal expansion
+  coefficients, and $\mathcal{D}^{\uparrow / \downarrow}_j$ are up/down-spin
+  \blue{Slater determinants}.
+  \item CASINO can also use backflow functions and geminal (pairing) wave
+  functions (later talk!).
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Slater Determinants}
+\begin{itemize}
+  \item Slater determinants have the generic form
+  \begin{equation}
+    \mathcal{D}({{\bf R}}) = \dfrac{1}{\sqrt{N_e}}
+    \begin{vmatrix}
+    \phi_1({\bf r}_1) & \phi_2({\bf r}_1)  & \cdots &
+    \phi_N({\bf r}_1) \\
+    \phi_1({\bf r}_2) & \phi_2({\bf r}_2)  & \cdots &
+    \phi_N({\bf r}_2) \\
+    \vdots  & \vdots & \ddots &\vdots \\
+    \phi_1({\bf r}_{N}) & \phi_2({\bf r}_N) & \cdots &
+    \phi_N({\bf r}_N) \\
+    \end{vmatrix},
+  \end{equation}
+  where the $\{ \phi_i \}$ are a set of single-particle
+  orbitals.\footnote{\ There will generally be two sets of $\{ \phi_i \}$, one
+  for each spin.}
+  \item These orbitals \blue{almost always} come from DFT, but can also be
+  taken from HF.\ These orbitals
+  \begin{itemize}
+    \item Can sometimes be \green{optimised} in QMC.\
+    \item May be complex, but the determinant can \green{still be real}.
+    \item Can be represented in PW, Gaussian, \ldots bases (see xwfn.data
+    specifications).
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Slater Determinants (II)}{Where can you acquire orbitals?}
+\begin{itemize}
+  \item Gaussians:
+  \begin{itemize}
+    \item CRYSTAL
+    \item GAUSSIAN
+    \item GAMESS-US
+    \item Turbomole
+    \item $\langle$any code which can write in the MOLDEN format$\rangle$
+  \end{itemize}
+  \item Plane Waves (to be converted to blips!):
+  \begin{itemize}
+    \item QuantumEspresso (pwscf)
+    \item CASTEP
+    \item ABINIT
+    \item MCEXX
+  \end{itemize}
+  \item Blips
+  \begin{itemize}
+    \item Direct from pwscf.
+  \end{itemize}
+  \item NAO / Slater orbitals: Others.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Slater Determinants (III)}{The rest of the Slater part\ldots}
+\begin{itemize}
+  \item If you like, you can use multideterminant expansions. The coefficients
+  $\{ \alpha_j \}$ can be
+  \begin{itemize}
+    \item \green{optimised} in QMC (as variational
+  parameters), or
+    \item taken as is from a \blue{post-HF method}.\footnote{\ OR, I suppose,
+  fixed by transformation properties of the desired trial state in an excited
+  state calculation\ldots}
+  \end{itemize}
+
+  \item Why might you \red{not want to} do this?
+  \begin{itemize}
+    \item Determinants are not a compact means of recovering \blue{correlation
+    energy}.
+    \item Solids (which are perhaps most interesting to QMC people) don't tend
+    to have lots of \blue{multi-reference character}.
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\subsection{Figures of Merit: $E_{\text{corr}}$}\label{sub:figures_of_merit}
+
+\begin{frame}{Figures of Merit: $E_{\text{corr}}$}
+\begin{itemize}
+  \item The \blue{correlation energy}, $E_{\text{corr}}$, is a figure of merit
+  we can use to judge how good a given wave function form is. Let the VMC
+  energy of the wave function in question be $E_{\text{VMC}}$.
+  \item If $E_{\text{HF}}$ is the Hartree-Fock energy of the system,\footnote{\
+  Which is the lowest energy we can get with a single determinant!} and $E_0$
+  is the true ground state energy, we can define $\eta$ as follows
+  \begin{equation}
+    \eta = \dfrac{E_{\text{HF}} - E_{\text{VMC}}}{E_{\text{HF}} - E_{0}}.
+  \end{equation}
+  \item $\eta$ is the fraction of correlation energy retrieved by that given
+  wave function.
+  \item $\eta = 1$ is ``in our dreams'', $\eta>0.8$ is \green{reasonable}.
+  \item Because we don't know $E_0$, we often
+  approximate it by the \blue{fixed-node DMC energy}, $E_{\text{DMC}}$.
+\end{itemize}
+\end{frame}
+
+
+\section{Jastrow Factors (JFs)}\label{sec:jastrow_factors}
+\subsection{What does the JF do?}\label{sub:what_does_j_do}
+
+\begin{frame}{Jastrow Factors}
+\begin{itemize}
+  \item The Jastrow factor, $\exp{\left[ \mathcal{J}({\bf R}) \right]}$, is an
+  explicit function of inter-particle distances.
+  \item $\mathcal{J}$ is real, symmetric, and contains \green{optimisable
+  parameters}.
+  \item $\mathcal{J}$ offers a \blue{compact} parametrisation of correlation effects. The
+  number of parameters necessary to achieve a given $\eta$ is \green{system-size
+  independent}.
+  \item If the wave function is to be antisymmetric, $\exp{\left[
+  \mathcal{J} \right]} > 0$. Corollary: The Jastrow factor does not change the
+  \blue{nodal surface} of the wave function.\footnote{\ The nodal surface is the
+  set of points on which the wave function is zero.}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Jastrow Factors (II) - Why do we need them?}
+\begin{itemize}
+  \item Jastrow factors
+  \begin{itemize}
+    \item Allow us to satisfy the \blue{Kato cusp
+    conditions}.\footfullcite{Kato1957,Pack1966}
+    \item \green{Lessen the extent} of systematic biases in the DMC method.
+    \item Allow us to obtain \green{smaller error bars} in VMC and DMC for the same
+    amount of computational expense.
+    \item Improve the collection of quantities which are obtained from
+    \blue{extrapolated estimates}.\footnote{\ This requires a good VMC wave
+    function.}
+    \item \green{Reduce} the potency of population fluctuations (and related
+    issues) in DMC calculations.
+    \item Allow us to obtain \green{even better} nodal surfaces when we
+    optimise in parallel with parameters that affect the nodal surface.
+    \pause{}
+    \item {\bf Are worth the pain and headaches they might cause us when we
+    struggle to optimise them.}
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Kato Cusp Conditions (I) - Antiparallel Spins}
+
+\begin{itemize}
+  \item Consider two spins\footnote{\ In an isolated system, or as a subset of
+  another.}, having \textit{opposite spins} ($\uparrow,\ \downarrow$),
+  reduced mass $\mu=\frac{1}{2}$, and
+  separated by a vector ${\bf r}$.
+  \item We can write the two-particle wave function\footnote{\ Which {\bf
+  doesn't}
+  have to be spatially antisymmetric! I.e.\ we can use {\bf both} odd and even
+  $\ell$.} for these two spins as
+  \begin{equation}
+    \psi({\bf r}) = \sum^{\infty}_{\ell=0}\sum^{\ell}_{m_{\ell}=-\ell}
+    \psi_{\ell,m_{\ell}}(r)
+    \cdot \mathcal{Y}_{\ell,m_{\ell}}(\theta,\phi)
+    \cdot r^{\ell}.
+  \end{equation}
+  \item Now we ask the question: what is the contribution to the local energy
+  from this configuration?
+  \begin{equation}
+    E_{L} = \dfrac{-\nabla^2\psi}{\psi} + \dfrac{1}{r} =
+    \dfrac{-\nabla^2\psi_{00}(r)}{\psi_{00}(r)} + \dfrac{1}{r} +
+    \mathcal{O}(r).
+  \end{equation}
+  \item We care about small $r$ values. Here, $\psi_{00}(r) \approx
+  \psi_{00}(0) + r\cdot{\left[\frac{\partial\psi_{00}(r)}{\partial r}
+  \right]}_{r=0}$
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Kato Cusp Conditions (II) - Antiparallel Spins cont.}
+\begin{itemize}
+  \item Substituting the Taylor expansion of $\psi_{00}$ into the local energy,
+  we find that
+  \begin{equation}
+    E_L = \dfrac{-2}{r\psi_{00}(0)}{\left[ \frac{\partial \psi_{00}(r)}{\partial
+    r}  \right]}_{r=0} + \dfrac{1}{r} + \mathcal{O}(r).
+  \end{equation}
+  \item \textbf{Important bit:} $E_L$ should not diverge as $r\rightarrow 0$.
+  For an eigenfunction, it should be a constant (equal to the energy eigenvalue
+  of that eigenfunction). Therefore, we require
+  \begin{equation}
+    \underbrace{\boxed{{\left[ \dfrac{\partial \psi_{00}}{\partial r}  \right]}_{r=0} =
+    \dfrac{1}{2}\psi_{00}(0)}}_{\text{``Antiparallel Kato Cusp Condition''}}
+  \end{equation}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Kato Cusp Conditions (III) - Parallel Spins}
+
+\begin{itemize}
+  \item What changes when the spins are \blue{parallel}? We have to make the
+  spatial wave function manifestly \red{antisymmetric} - we only include odd $\ell$!
+  \begin{equation}
+    \psi({\bf r}) = \red{\sum_{\text{odd}\ \ell}}\sum^{\ell}_{m_{\ell}=-\ell}
+    \psi_{\ell,m_{\ell}}(r) \cdot
+    \mathcal{Y}_{\ell,m_{\ell}}(\theta,\phi) \cdot
+    r^{\ell}.
+  \end{equation}
+
+  \item A similar analysis yields a set (one for each $-1 \leq m_{\ell} \leq 1$) of
+  parallel-spin Kato conditions
+  \begin{equation}
+    \underbrace{\boxed{{\left[ \dfrac{\partial \psi_{1,m_{\ell}}}{\partial r}
+    \right]}_{r=0} = \dfrac{1}{4}\psi_{1,m_{\ell}}(0)}}_
+    {\text{``Parallel Kato Cusp Condition\@(s)''}}
+  \end{equation}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Kato Cusp Conditions (IV)}
+
+\begin{itemize}
+  \item The cusp conditions mean that the local energy has discontinuities.
+\end{itemize}
+
+\begin{figure}[H]
+  \floatbox[{\capbeside\thisfloatsetup{capbesideposition={left, center},
+  capbesidewidth=0.5\textwidth}}]{figure}[\FBwidth]
+  {\caption{The effect of applying cusp conditions to a pair of coalescing
+  electrons. These electrons were part of a family of 16, in an all-electron
+  calculation for the O$_2$ dimer. The remnant electrons have been frozen in
+  identical positions for both plots.}\label{fig:cusps}}
+  {\includegraphics[width=0.5\textwidth]{figs/cc_plots.pdf}}
+\end{figure}
+\end{frame}
+
+
+\begin{frame}{Kato Cusp Conditions (V)}
+
+\begin{itemize}
+  \item To really make the point - if you don't apply cusp conditions, you see this:
+\end{itemize}
+\begin{minipage}[t]{0.45\textwidth}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.9\linewidth]{figs/diff_spin.pdf}
+  \caption{Different spins.}
+\label{fig:diff_spin}
+\end{figure}
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.45\textwidth}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.9\linewidth]{figs/same_spin.pdf}
+  \caption{Same spins.}
+\label{fig:same_spin}
+\end{figure}
+\end{minipage}%
+\end{frame}
+
+
+\begin{frame}{Electron-nucleus Cusp Conditions}
+\begin{itemize}
+  \item There are other cases where the local energy might diverge. I just
+  showed you plots from \blue{an all-electron calculation}.
+  \item This means \red{bare nuclei} are present, and that the local energy may
+  also diverge as an electron moves into a nucleus (of nuclear charge $Z$,
+  let's say).
+  \item In this case, the \textit{spherical average} of $\psi_1({\bf
+  r})$\footnote{\ Which is a 1-electron wave function, with {\bf r} centred
+  on the nucleus (i.e.\ not a relative coordinate, like before)!} obeys
+  \begin{equation}
+    {\left[ \dfrac{\partial \expt{\psi_1}_{\theta,\phi}}{\partial r}
+    \right]}_{r=0} = -Z \expt{\psi_1}_{\theta,\phi}(0),
+  \end{equation}
+  with
+  \begin{equation}
+    \expt{a}_{\theta,\phi}(r) \propto \dfrac{1}{4\pi r^2}
+    \dfrac{\int\dd{\bf r}\ a({\bf r})\cdot P({\bf r})}{\int\dd{\bf r}\ P({\bf
+    r})}.
+  \end{equation}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Cusp Conditions - Notes}
+
+\begin{itemize}
+  \item It is easy to see how conditions on the wave functions become
+  conditions on the Jastrow factor (which we can fix ourselves!).
+  Examples:\footnote{\ All of these assume the Slater part of the corresponding
+  wave functions is smooth at coalescence points!}
+  \begin{align}
+    \text{Antiparallel e-e cusp} &\implies {\left[\dfrac{\partial \mathcal{J}}{\partial r_2}\right]}_{r_2=0} =
+    \dfrac{1}{2}. \\
+    \text{Parallel e-e cusp} &\implies {\left[\dfrac{\partial \mathcal{J}}{\partial r_2}\right]}_{r_2=0} =
+    \dfrac{1}{4}. \\
+    \text{Electron-nucleus cusp} &\implies {\left[ \dfrac{\partial \mathcal{J}}{\partial r_1}
+    \right]}_{r_1=0}
+    = -Z.
+  \end{align}
+  \item These become \green{trivial constraints} on certain parameters in our
+  Jastrow factor.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Cusp Conditions - Notes (II)}
+\begin{itemize}
+  \item If you use a non-divergent pseudopotential, you \green{don't have a
+  cusp}, and hence, you don't need the electron-nucleus cusp conditions.
+  \begin{itemize}
+    \item Trying to apply cusp conditions in this case will lead to \red{bad
+    behaviour} in VMC and (if you manage to optimise anything\ldots) also in
+    DMC.\@ Trust me \Winkey.
+  \end{itemize}
+  \item If your orbitals (the Slater part of the wave function) satisfy the
+  cusp conditions, then the Jastrow factor \green{doesn't need to}.
+  \begin{itemize}
+    \item Each orbital must separately satisfy the electron-nucleus cusp
+    conditions for this to be the case!
+  \end{itemize}
+  \item It is \red{impossible} to describe cusps with a finite number of
+  Gaussian\footfullcite{Ma2005} / Plane Wave / Blip basis functions.
+  \begin{itemize}
+    \item See \textbf{use\_gpcc} and \textbf{cusp\_correction} CASINO keywords.
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\subsection{CASINO's JF}\label{sub:casino_jastrow}
+
+\begin{frame}{CASINO's Jastrow Factor\@(s)}
+
+\begin{itemize}
+  \item CASINO has two means of describing a Jastrow factor:
+  \begin{itemize}
+    \item The old, fast way: the correlation.data file \& pjastrow.f90.
+    \item The new, slower (but more general) way: the parameters.casl file \&
+    gjastrow.f90.
+  \end{itemize}
+  \item I'll talk about the former, because it's \textit{what I know}, and
+  it's not massively restrictive.\footnote{\ A notable
+  example is the $\nu$-Jastrow factor, which is only available within the
+  general scheme.} If you want to \green{play around}, you can switch schemes
+  and have CASINO turn a correlation.data file into a parameters.casl
+  file.\footnote{\ I keep saying I will do this\ldots}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{CASINO's Jastrow Factor (II)}
+
+\begin{itemize}
+  \item Regardless of how you access it, the ``standard form'' of CASINO's
+  Jastrow factor\footfullcite{Drummond2004} is
+  \begin{align}
+    \mathcal{J}({\bf R}) &= \sum_{\substack{\text{e-e pairs} \\ i,j }} u(r_{ij})
+    + \sum_{\substack{\text{e-N pairs} \\ i, I}}\chi_{I}(r_{iI}) \nonumber \\
+    &+ \sum_{\substack{\text{e-e-N triplets} \\ i, j, I}}f_I(r_{iI}, r_{jI}, r_{ij})
+    + \sum_{\substack{\text{e-e pairs} \\ i, j}}p({\bf r}_{i, j}) \ +
+    \ \text{maybe a few others}
+  \end{align}
+  \item $u(\chi)$ is an isotropic function of e-e\@(e-N) separations;
+  $r_{ij}(r_{iI})$.
+  \item $f_I$ is an isotropic function of e-N and e-e separations; $r_{iI},\
+  r_{jI},\ r_{ij}$.
+  \item $p$ is a plane-wave expansion in e-e vectors; ${\bf r}_{ij}$
+  \item Distances are evaluated in the \blue{minimum image convention}.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{CASINO's Jastrow Factor (III) - Gory Details}
+
+\begin{itemize}
+  \item Each of these contains \green{optimisable parameters}. Here, $C$ is the
+  truncation order (2 or 3 common), and ${\bf G}$ are simulation-cell
+  reciprocal lattice vectors.
+  \begin{align}
+    u(r_{ij}) &= \Theta(L_u - r_{ij}){(r_{ij} - L_u)}^C
+    \sum^{N_u}_{l=0}\alpha_l r^{l}_{ij} \nonumber \\
+    \chi_I(r_{iI}) &= \Theta(L_{\chi_I} - r_{iI}){(r_{iI} - l_{\chi_I})}^C
+    \sum^{N_{\chi_I}}_{m=0} \beta_m r^m_{iI}  \nonumber \\
+    f_I(r_{iI}, r_{jI}, r_{ij}) &= \Theta(L_{f_I} - r_{iI})  \Theta(L_{f_I} -
+    r_{jI}) {(r_{iI} - L_{f_I})}^C{(r_{jI} - L_{f_I})}^C \times \nonumber \\
+    &\qquad \sum^{N^{eN}_{fI}}_{l=0,m=0}  \sum^{N^{ee}_{fI}}_{n=0}
+    \gamma_{lmn} r^{l}_{iI}r^{m}_{jI}r^{n}_{ij}
+    \nonumber \\
+    p({\bf r}_{ij}) &= \sum_{A, {\bf G}} a_A \cos{({\bf G} \cdot {\bf r}_{ij})}
+  \end{align}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{CASINO's Jastrow Factor (IV) - Further Gory Details}
+\begin{itemize}
+  \item In the previous, the $\alpha_l,\ \beta_m,\ \gamma_{lmn}$ and $a_A$ are
+  \blue{optimisable} parameters.
+  \item The $L_{\langle\text{something}\rangle}$ are cut-off lengths, at these
+  distances, the polynomials determined by the optimisable parameters go
+  \green{smoothly} to zero.
+  \item Cut-off lengths \textit{can} be optimised,\footnote{\ Only by variance
+  minimisation!} but advice is:
+  make $L_u$ as big as possible,
+  and make $L_\chi$ and $L_f$ equal to around 1-2 bond lengths, say.
+  \item A value of $C=n$ means that the ${(n-1)}^{\text{th}}$ derivative of the
+  wave function is continuous everywhere. $C=3$ is typical.
+  \item We know different spin configurations have different cusp conditions.
+  We can have \green{different parameters for each spin} if we wish ($u$-term).
+% In the case of a magnetic system, we might also want spin-dependent $\chi,\
+% f$ terms.
+\end{itemize}
+\end{frame}
+
+
+\subsection{Practical use of CASINO's JF}\label{sub:practical_use_of_casino_jf}
+
+\begin{frame}{Practical use of CASINO's JF}
+
+\begin{itemize}
+  \item When creating a new Jastrow factor, the easiest place to start is
+  \blue{with
+  an existing one}. Can either find a similar one from previous work, or copy a
+  close example from the CASINO examples directory.
+  \item Sometimes, one only needs a certain subset of the available Jastrow
+  functions. Terms describing higher correlations ($f$, $H$ for example)
+  \red{don't usually change much}.
+  \item All parameters that are not cut-off lengths are ``linear parameters'',
+  and we usually start knowing \red{none} of these.
+  \item CASINO knows how to ``fill in blanks'' with reasonable defaults (i.e.\
+  defaults that \green{satisfy the cusp conditions}).
+  \item Blank $p$ terms can be generated with the \textbf{make\_p\_stars} utility.
+\end{itemize}
+\end{frame}
+
+
+\section{Optimisation}\label{sec:optimisation}
+
+\begin{frame}{Optimisation}
+\begin{itemize}
+  \item The \red{hardest} part of any QMC calculation is usually wave function
+  optimisation.
+  \item This problem defies all attempts at automation, and (especially if you
+  consider systems that are capable of being unbound) can be quite
+  \red{annoying}.
+  \item However, the \green{rewards} are numerous, and we should all go to
+  great lengths to make sure we have the \blue{best wave function we can possibly
+  have}.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Energy Minimisation}
+\begin{itemize}
+  \item Consider the exact eigenstates of a Schr\"{o}dinger equation
+  \begin{equation}
+    \mathcal{\hat H}\Phi_i = E_i \Phi_i, \qquad E_0 < E_1 < E_2 < \ldots,
+    \qquad \langle \Phi_i \vert \Phi_j \rangle = \delta_{i,j}
+  \end{equation}
+  \item Any arbitrary wave function $\Psi$ can be written as $\Psi = \sum_i c_i
+  \Phi_i$, and we can define an energy functional
+  \begin{equation}
+    E\left[ \Psi \right] = \dfrac{\langle \Psi \lvert \mathcal{\hat H} \rvert
+    \Psi \rangle}{\langle \Psi \vert \Psi \rangle} = \underbrace{\dfrac{\sum_m \lvert c_m
+    \rvert^2 E_m}{\sum_n \lvert c_n \rvert^2} \geq \dfrac{E_0\sum_m \lvert c_m
+    \rvert^2}{\sum_n \lvert c_n \rvert^2}}_{\text{``the variational principle''}} = E_0.
+  \end{equation}
+  \item Essentially, our $\{ \alpha,\ \beta,\ \gamma,\ \ldots \}$ variational
+  parameters control (with limited capacity) the particular coefficients $c_i$
+  appearing in the expansion of our trial wave function.
+  \item The idea of optimisation (generally) is to vary these such that some
+  goal is met. In energy minimisation, the goal is to \blue{minimise the
+  energy}.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Energy Minimisation (II)}
+\begin{itemize}
+  \item We can't just do this by repeated VMC calculation. Why? \red{Noise}.
+  \item We need optimisation methods that \blue{don't require derivatives}, and that
+  can \blue{cope with noise}. We also want to minimise the number of individual
+  ``function evaluations'' (here, each one of those would correspond to its own
+  VMC calculation!).
+  \item Before we do this, let's look at a general tool for use in statistical
+  physics, \blue{correlated sampling}.
+\end{itemize}
+\end{frame}
+
+\subsection{Correlated Sampling}\label{sub:correlated_sampling}
+
+\begin{frame}{Correlated Sampling}
+\begin{itemize}
+  \item Suppose that $\color{red}{\Psi^A}$ and $\color{blue}{\Psi^B}$ are two different
+  many-electron wave functions. The expectation value of an operator
+  $\mathcal{\hat O}$ with respect to $\color{red}{\Psi^A}$ is
+  \begin{align}
+    {\color{red}{\expt{\mathcal{\hat O}}}} &=
+    \dfrac{\displaystyle\int\dd{\bf R}\ \lvert {\color{red}{\Psi^A({\bf
+    R})}}\rvert^2 \times \left[ \mathcal{\hat O} {\color{red}{\Psi^A({\bf R})}} /
+    {\color{red}{\Psi^A({\bf R})}}  \right]}
+    {\displaystyle\int\dd{\bf R}\ \lvert {\color{red}{\Psi^A({\bf R})}}
+    \rvert^2} \nonumber \\
+    &=
+    \dfrac{\displaystyle\int\dd{\bf R}\ \lvert {\color{blue}{\Psi^B({\bf
+    R})}}\rvert^2 \times
+    \left[ \lvert{\color{red}{\Psi^A({\bf R})}}\rvert^2  /
+    \lvert{\color{blue}{\Psi^B({\bf R})}}\rvert^2  \right] \times
+    \left[ \mathcal{\hat O} {\color{red}{\Psi^A({\bf R})}} /
+    {\color{red}{\Psi^A({\bf R})}}  \right]}
+    {\displaystyle\int\dd{\bf R}\ \lvert {\color{blue}{\Psi^B({\bf R})}}
+    \rvert^2 \times
+    \left[ \lvert{\color{red}{\Psi^A({\bf R})}}\rvert^2  /
+    \lvert{\color{blue}{\Psi^B({\bf R})}}\rvert^2  \right]
+    }
+  \end{align}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Correlated Sampling (II)}
+\begin{itemize}
+  \item So, the expectation value $\expt{\color{red}{\mathcal{\hat O}}}$ is the
+  average of ${\color{red}{\mathcal{\hat O}_L}} =
+  {\color{red}{\Psi^A}}^{-1}\mathcal{\hat H}{\color{red}{\Psi^A}}$\ldots
+  \item Over configurations which are distributed as
+  $\lvert{\color{blue}{\Psi^B}}\rvert^2$\ldots
+  \item Weighted by ${\color{purple}{W^{A}_{B}}} = \left[
+  \lvert{\color{red}{\Psi^A({\bf R})}}\rvert^2  /
+  \lvert{\color{blue}{\Psi^B({\bf R})}}\rvert^2 \right]$\ldots
+  \item So what? We can calculate an expectation value with respect to one
+  state (${\color{red}{\Psi^A}}$, say) by using configurations generated by
+  ${\color{blue}{\Psi^B}}$.
+  \item Estimates of $\expt{{\color{red}{\mathcal{\hat O}}}}$ are a smooth
+  function of any parameters in $\color{red}{\Psi^A}$, for a given
+  configuration set.\pause{}
+  \item {\bf This is a useful, general tool, that happens (in this
+  case) to be handy for optimising wave functions!}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Reweighted Energy Minimisation}
+\begin{itemize}
+  \item Suppose we have an initial parameter set, $\{{\bf s}_0\}$, and initial
+  wave function $\Psi_{\{{\bf s}_0\}}$.
+  \item Generate a set of configs. $\{ {\bf R} \}$
+  distributed according to $\lvert \Psi_{\{{\bf s}_0\}} \rvert^2$ in VMC.\@
+  \item Using correlated sampling, we can estimate the energy expectation
+  value of a wavefunction $\Psi_{\{{\bf s}\}}$ by the weighted mean of the local
+  energy $\Psi_{\{{\bf s}\}}^{-1}\mathcal{\hat H}\Psi_{\{{\bf s}\}}$ - taken with the
+  configurations $\{ {\bf R} \}$ and weighted by $\lvert \Psi_{\{{\bf s}\}}  \rvert^2 /\lvert
+  \Psi_{\{{\bf s}_0\}}\rvert^2$.
+  \item \red{Why can't we use this method?}
+  \begin{itemize}
+    \item We sample a \blue{finite} number of configurations. The error in the
+    reweighted energy gets large when $\Psi_{\{{\bf s}_0\}}$ and $\Psi_{\{{\bf s}\}}$
+    differ appreciably.
+    \item The reweighted energy has \red{false minima}.
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Reweighted Variance Minimisation}
+\begin{itemize}
+  \item We can play the same game with a different objective function
+  \begin{equation}
+    \sigma^{2}_{RW}[\Psi] = \expt{\mathcal{\hat H}^2}[\Psi] -
+    {(\expt{\mathcal{\hat H}}[\Psi])}^2.
+  \end{equation}
+  \item If $\Psi$ were an eigenstate, $\sigma^2_{RW}$ would be \green{zero}.
+  We can therefore use $\sigma^2_{RW}$ as an objective function, and try to minimise
+  it!\footfullcite{Umrigar1988,Kent1999,Drummond2005}
+  \item \textbf{Key difference:} this method often works in practice.
+  \item The finite sampling errors persist, however, and we have to find \blue{ways
+  to mitigate them}. A common strategy is to perform \green{multiple cycles} of (i)
+  configuration generation and (ii) optimisation.
+\end{itemize}
+\end{frame}
+
+\subsection{Workhorse (usable!)  Methods}\label{sub:workhorse_methods}
+
+
+\begin{frame}{Unreweighted Variance Minimisation}
+\begin{itemize}
+  \item If $\Psi({\bf R})$ is an eigenstate, then $E_L({\bf R}) = \Psi^{-1}({\bf
+  R})\mathcal{\hat H}\Psi({\bf R})$ is a constant.
+  \item Can optimise a trial wave function $\Psi_{\{ {\bf s} \}}({\bf R})$  by
+  minimising the \textit{unreweighted} variance
+  \begin{equation}
+    \sigma^2_{U,\{{\bf s}\}} = \dfrac{1}{N - 1} \sum_{\bf R} {\left[ E_{L,\{ {\bf s}
+    \}}({\bf R}) - \expt{E_{L,\{{\bf s}\}}}  \right]}^2,
+  \end{equation}
+  with $N$ the \blue{number of configurations} sampled.
+  \item This minimisation procedure is like least-squares fitting, and $N$
+  doesn't have to be too large. But\ldots
+  \item Suppose we take configurations from VMC (sample $\Psi_{\{{\bf s}_0\}}({\bf
+  R})$):
+  \begin{itemize}
+    \item If we have infinitely many samples, $\sigma^2_{RW}$ is independent of
+    the starting trial function.
+    \item However, $\sigma^2_{U}$ still \red{depends on $\{ {\bf s}_0 \}$}. In practice, we
+    have to cycle URW variance minimisation until a \green{self-consistent} set of $\{
+      {\bf s}\}$ are obtained.
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Linear Parameters in $\mathcal{J}$ - ``linjas''
+methods\footfullcite{Drummond2005}}
+\begin{itemize}
+  \item Many Jastrow parameters are ``linear'': they appear as
+  multipliers of non-linear functions of inter-particle distances.
+  \item Suppose we have a Jastrow factor which is part linear ($L$ linear
+  parameters, $\alpha_l$)
+  \begin{equation}
+    \mathcal{J}({\bf R}) = \mathcal{J}_{NL}({\bf R}) + \sum^{L}_{l=0}\alpha_l
+    \cdot j_l({\bf R})
+  \end{equation}
+  \item \textbf{Important fact:} $E_L$ is a \green{second order polynomial} in
+  the linear parameters. Proof outline:
+  \begin{itemize}
+    \item Important $E_L$ contribution from $\Psi^{-1}\nabla^2\Psi$
+    \item Product rules on Laplacian
+    \item Has to be a term going like $\mathcal{J}'^2$
+    \item Terms have to be \red{trivial offsets} to $\mathcal{J}$ not to
+    contribute quadratically to $E_L$
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Linear Parameters (II)}
+\begin{itemize}
+  \item Why is this neat? $\sigma^2_{U}$ is now a fourth order polynomial, and
+  we \textbf{don't have to sum over configurations to optimise it}. We can find
+  global minima of quartics fast, and repeatedly, along lines in parameter
+  space.
+  \item This is a \green{very} fast method, but only works for linear
+  parameters.
+  \item Happily, \green{most parameters in the Jastrow factor are linear}.
+  \item If you have already given up on optimising cut-off lengths, and can
+  sensibly fix them, you will benefit from using this method \green{greatly}.
+  \item Other non-linear parameters: see other talks! (I'll mention these
+  briefly later.)
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Variance Minimisation URW vs. RW}
+\begin{itemize}
+  \item Generally speaking, one always wants to use URW variance minimisation.
+  Why?
+  \begin{itemize}
+    \item In the limit of large numbers of configurations, it usually leads to
+    \green{lower energies} (i.e.\ objectively \textit{better} wave functions).
+    \item In the limit of low numbers of configurations, it is usually \green{more
+    stable}.
+    \item I just showed you that we can optimise the URW variance for linear
+    Jastrow factors \green{very efficiently}.
+    \item The URW variance tends to have \green{fewer spurious minima} in parameter
+    space (you can be fairly sure that obtaining the global minimum is possible
+    and likely for a well-behaved system).
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\subsection{Optimisation in CASINO}\label{sub:optimisation_in_casino}
+
+\begin{frame}{Practical Use in CASINO}
+
+\begin{block}{Standard (URW) Variance Minimisation}
+\begin{itemize}
+  \item Set opt\_method to ``varmin'', and run\_type to ``vmc\_opt''.
+  \item Typically want number of configs (set by ``vmc\_nconfig\_write'') of order 100,000
+(system-dependent).
+  \item In order to ensure VMC data are not serially correlated,
+can either use ``vmc\_nstep'' $\gg$ ``vmc\_nconfig\_write''.\footnote{OR set
+``vmc\_decorr\_period'' (sets decorrelation loop length).}
+  \item Set what you want to optimise with the ``opt\_<x>'' keywords.
+\end{itemize}
+\end{block}
+
+\begin{block}{Fast (Linear Param.) Variance Minimisation}
+\begin{itemize}
+  \item Set opt\_method to ``varmin\_linjas'' - only ``opt\_jastrow''!
+  \item Cut-off lengths will be ignored (regardless of flag setting 0 or 1).
+\end{itemize}
+\end{block}
+\end{frame}
+
+
+\begin{frame}{Parameters That Affect Nodes}
+
+\begin{itemize}
+  \item Backflow parameters, multideterminant expansion coefficients, orbital
+  parameters, and other such parameters \red{affect the nodal surface of a
+  trial wave function}.
+  \item These are traditionally \red{hard} to optimise, because the local
+  energy diverges at the nodal surface (and because points close to the nodal
+  surface are rarely sampled!).
+  \item URW variance is poorly defined in the limit of infinite sampling, and
+  diverges when a configuration moves through a node (because $E_L$ does\ldots)
+  \item When optimising parameters that affect the nodal surface, we often find
+  that energy and variance minima are \red{significantly separated}.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Other Measures of Spread}
+\begin{itemize}
+  \item The variance is not special. There are other moments and measures on the
+  local energy.
+  \item Even if the variance diverges, some of these other \green{robust}
+  measures of spread are finite. Singular points don't affect these measures as
+  strongly as they do the variance.
+  \item A good example is the Mean Absolute Deviation from the median (a.k.a.\
+  the MAD)
+  \begin{equation}
+    {\rm MAD} = \dfrac{1}{N}\sum_{\bf R} \lvert E_L({\bf R}) - E_{1/2}  \rvert
+  \end{equation}
+  with $E_{1/2}$ the median.\footnote{\ Because it separates the lower half of
+  the energies from the upper half!} This usually results in an energy lower
+  than that achieved by variance minimisation.
+\end{itemize}
+\end{frame}
+
+\subsection{Finding Parameters - Diagonalisation and Least Squares}\label{sub:finding_parameters_diagonalisation_and_least_squares}
+
+
+\begin{frame}{Diagonalising the Hamiltonian}
+
+\begin{itemize}
+  \item How do we actually find optimal parameter
+  values?\footfullcite{Nightingale2001}
+  \item Suppose we propose a (small) change in parameter values ${\bf s}_0$
+  \begin{equation}
+    {\bf s}_0 \rightarrow {\bf s} = {\bf s}_0 + {\bf \delta s},\quad \Psi_{\bf
+    s} = \Psi_{{\bf s}_0} +
+    \sum^{N_s}_{i=1} \delta s_i{\left[ \dfrac{\partial \Psi}{\partial s_i}
+    \right]}_{{\bf s}_0} +
+    \mathcal{O}\left[{({\delta \bf s})}^2\right] \simeq
+    \sum^{N_s}_{i=0} c_i \beta_i,
+  \end{equation}
+  where $c_i$ and $\beta_i$ are defined by
+  \begin{equation}
+    c_i =
+    \begin{cases}
+    1 &\text{ if } i=0 \\
+    \delta s_i &\text{ if } i>0
+    \end{cases},
+  \end{equation}
+  and
+  \begin{equation}
+    \beta_i = \begin{cases}
+      \Psi_{{\bf s}_0} &\text{ if } i=0 \\
+      {\left[ \frac{\partial \Psi}{\partial s_i}  \right]}_{{\bf s}_0}
+      &\text{ if } i>0
+    \end{cases}.
+  \end{equation}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Diagonalising the Hamiltonian (II)}
+
+\begin{itemize}
+  \item The previous slide is approximate for most optimisable parameters, but
+  is exact if one is optimising multideterminantal expansion
+  coefficients (expression of \textbf{total} derivative).
+
+  \item Generally this method is valid when $\delta {\bf s}$ is small. We
+  usually iterate to \green{self-consistency}.
+
+  \item Ignoring the terms $\mathcal{O}\left[ {(\delta{\bf s})}^2 \right]$, we
+  can minimise $\expt{\mathcal{\hat H}}$ with respect to the $c_i$, keeping the
+  norm of $\Psi$ fixed.[Nightingale] I.e.\ we can solve the \blue{secular equation}
+  \begin{equation}
+    {\left( \mathcal{H} - E S  \right)}_{ij}\cdot c_j = 0_i
+  \end{equation}
+  with
+  \begin{equation}
+    \mathcal{H}_{ij} = \bra{\beta_i} \mathcal{\hat H} \ket{\beta_j},\quad S_{ij}
+    = \bra{\beta_i} \beta_j \rangle.
+  \end{equation}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Diagonalising the Hamiltonian (III)}
+\begin{itemize}
+  \item $E$ is an eigenvalue. The lowest E corresponds to the set of
+  parameters $c_i$ which lead to the lowest energy.
+  \item How do we estimate the values of the high-dimensional integrals
+  appearing in $\mathcal{H}_{ij}$ and $S_{ij}$? \blue{You tell me.} \pause{}
+  \item \green{VMC!}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Least Squares Method}
+\begin{itemize}
+  \item We could also consider diagonalising this Hamiltonian by another
+  means.\footfullcite{Toulouse2007}
+  \item If (and we will assume) the basis states $\{ \beta_i \}$ span an
+  \blue{invariant subspace} of $\mathcal{\hat H}$, then
+  \begin{equation}
+    \mathcal{\hat H} \beta_i({\bf R}) = \sum^{N_s}_{j=0} \eta_{ji} \beta_j({\bf
+    R})
+  \end{equation}
+  for all of the ($N$ total) VMC-generated configurations ${\bf R}$ and with
+  some coefficients $\eta_{ji}$.
+  \item If we know $\eta$, then we can solve a related problem on $\eta$
+  ($\sum_j \eta_{ij}\cdot c_j = Ec_{i}$) for the $\delta {\bf s}$ (i.e.\ the
+  eigenvector $c_i$).\footnote{\ If $c$ solves this equation, then you can show
+  that $c$ solves a Schr\"{o}dinger-like equation. The method becomes
+  equivalent to the previous one, with a sampling caveat.}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Least Squares Method (II)}
+\begin{itemize}
+  \item If the $\{\beta_i\}$ did span an invariant subspace, we could take
+  \green{any} $N_s+1$ points in configuration space ($N_s+1$ different configs
+  ${\bf R}$) and solve for $\eta$ (a linear problem, with equal number of
+  equations and unknowns).
+  \item Usually, $N \gg N_s$ - so we have \green{far more equations} than we have
+  \red{unknowns}. The problem is \textit{overdetermined}.
+  \item We can solve this problem by least-squares, we minimise
+  \begin{equation}
+    \chi^2 = \sum^{N}_{k=1} \sum^{N_s}_{l=0} {\bigg\lvert
+    \dfrac{\mathcal{\hat H} \beta_l({\bf R}_k) -
+    \sum^{N_s}_{j=0}\eta_{jl}\beta_j({\bf R}_k)}
+    {\Psi_{\{ {\bf s}_0 \}}({\bf R}_k)}
+    \bigg\rvert}^{2}
+  \end{equation}
+  with respect to $\eta_{ji}$.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Least Squares Method (III)}
+\begin{block}{How do we do this in practice?}
+\begin{itemize}
+  \item Define $B_{kl} = \beta_{l}({\bf R}_k) / \Psi_{\{{\bf s}_0\}}({\bf
+  R}_k)$ and $B^{\mathcal{H}}_{kl} = \left[ \mathcal{\hat H}\beta_{l}({\bf
+  R}_k) \right] / \Psi_{\{{\bf s}_0\}}({\bf R}_k)$.
+  \item The requirement that $\partial_{\eta_{jl}} \chi^2 = 0$ implies
+  \begin{equation}
+    \sum^{N}_{k=1} \left[ B^{\mathcal{H}}_{ki} - \sum^{N_s}_{l=0}
+    \eta_{li}B_{kl} \right] B^{\star}_{kp} = 0.
+  \end{equation}
+  i.e.\
+  \begin{equation}
+    \eta = {(B^{\dagger}B)}^{-1} - B^{\dagger}B^{\mathcal{H}}.
+  \end{equation}
+  \item Each of these matrix products are proportional to VMC estimates that
+  \green{are known}.\footnote{\ Estimates of $S$ and $\mathcal{H}$ to be exact.}
+\end{itemize}
+\end{block}
+\end{frame}
+
+
+\begin{frame}{Least Squares Method (IV)}
+\begin{itemize}
+  \item The previous diagonalisation method, and the least squares method, are
+  equivalent in the limit of \blue{infinite sampling}
+  \begin{equation}
+    \lim_{N \rightarrow \infty} \eta = S^{-1}\mathcal{H}.
+  \end{equation}
+  \item Least squares is also exact \blue{if basis functions span an invariant
+  subspace} of $\mathcal{\hat H}$ (useful example: if the $\{ {\bf s} \}$ are
+  multideterminantal expansion coefficients!). This is true even for finitely
+  sampled configuration sets.
+  \item \textbf{Point: } Least squares method is \green{usually better} - having much
+  smaller finite sampling errors.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Our Approximations and Their Validity}
+\begin{itemize}
+  \item We've always stated the caveat that these methods are OK when
+  parameters changes are \textit{small}. We can try to prevent large parameter
+  changes by \blue{semi-orthogonalisation}.
+  \item The idea is to pick a norm.\@ for $\Psi_{\{{\bf s}\}}$ which depends on
+  parameters.
+  \begin{itemize}
+    \item The norm.\@ is such that $\{ \beta_i \}$ ($i \geq 1$) are
+    \textit{orthogonal} to some wave function $\Phi$.
+    \item $\Phi$ is chosen to be a mixed combination of the old wave function
+    and (the linear approximation to) the new one.
+  \end{itemize}
+  \item Instabilities are usually associated with large steps in parameter
+  space. This scheme \green{lessens the potential potency} of such
+  instabilities.\footnote{\ Should they occur\ldots}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Using Linear-Least-Squares Energy Minimisation}
+\begin{itemize}
+  \item The Linear-Least-Squares method is the default in CASINO, and is what
+  will be used should you set \textbf{opt\_method} to \textbf{emin}.
+  \item Generally:
+  \begin{itemize}
+    \item Energy minimisation requires \red{more configurations} than variance
+    minimisation would.
+    \item Energy minimisation often \red{struggles} if the starting wave function is
+    non-at-all optimised (i.e.\ if you have a blank correlation.data file).
+    \item Energy minimisation is almost always used as the \blue{last step
+    before DMC}.
+    \item If you have parameters that can affect the nodal surface,
+    energy minimisation will usually \green{lower the energy of the trial wave
+    function significantly}.
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+
+\section{Summary}\label{sec:summary}
+
+
+\begin{frame}{Summary}
+\begin{itemize}
+  \item Optimisation is an important part of a QMC study. It should be
+  performed to the \blue{best of our ability}, and it is almost always
+  \green{worth the extra effort}.
+  \item Optimisation can often be \red{tricky}, but on the other hand, we do it
+  only a \green{few times} per project, and it takes up a \green{small
+  fraction} of total CPU time.
+\end{itemize}
+\begin{block}{A Strategy:}
+  \begin{itemize}
+    \item \blue{Fix cut-off lengths} to physically reasonable values.
+    \item \blue{Start with varmin / madmin} - emin struggles from nothing!
+    \item If you have difficulty, \blue{lower the number of parameters} /
+    exclude less important terms (e.g.\ in a solid, if you have trouble, leave
+    out the $f$ term initially, add it in later and re-optimise).\pause{}
+    \item \textbf{Don't be afraid to ignore this advice - we all find
+    exceptions, sometimes regularly!}
+  \end{itemize}
+\end{block}
+\end{frame}
+
+
+
+
+
+% *{{ Thanks!
+\begin{frame}[plain]
+\begin{center}
+  {\Huge Thank you all for listening!} \\
+  %\vspace{2cm}
+  %{\Large} Thanks to the NOWNano CDT / EPSRC for my funding.
+\end{center}
+\end{frame}
+% }}*
+
+% - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+% *{{ References and end document
+\begin{frame}[t,allowframebreaks]{References}
+
+\printbibliography[]
+
+\end{frame}
+\end{document}
+
+% }}*

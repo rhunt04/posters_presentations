@@ -1,0 +1,376 @@
+% *{{ Actual preamble
+% *{{ preamble
+\documentclass[12pt, pdf, hyperref={draft}, usenames, dvipsnames]{beamer}
+\usepackage{libertine, textcomp, amssymb, wasysym, color, ulem, verbatim}
+\usepackage{floatrow, subcaption}
+% hide controls
+\usenavigationsymbolstemplate{}
+\usepackage[T1]{fontenc}
+\synctex=1
+\setbeamertemplate{caption}[numbered]
+% }}*
+
+% *{{ item colouring and themes
+\usecolortheme{beaver}
+\setbeamertemplate{footline}[frame number]
+\definecolor{LancsRed}{HTML}{B5121B}
+\setbeamercolor{item}{fg=LancsRed}
+\setbeamercolor{title}{fg=LancsRed}
+\setbeamercolor{structure}{fg=LancsRed}
+\setbeamercolor{frametitle}{fg=LancsRed}
+\setbeamercolor{footnote mark}{fg=LancsRed}
+\setbeamercolor{footnote}{fg=LancsRed}
+\setbeamercolor{bibliography entry author}{fg=LancsRed}
+\setbeamercolor{bibliography entry title}{fg=black}
+\setbeamercolor{bibliography entry note}{fg=black}
+\setbeamercolor{section in toc}{fg=LancsRed}
+%\setbeamercolor{subsection in toc}{fg=gray}
+\newcommand{\gitem}[1]{\setbeamercolor{item}{fg=ForestGreen}\item[$\checkmark$] #1}
+\newcommand{\bitem}[1]{\setbeamercolor{item}{fg=LancsRed}\item[$\times$] #1}
+\newcommand{\nitem}[1]{\setbeamercolor{item}{fg=NavyBlue}\item[$-$] #1}
+% }}*
+
+% *{{ niceties
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\e}{\mathrm{e}}
+\newcommand{\ket}[1]{\lvert{#1}\rangle}
+\newcommand{\bra}[1]{\langle{#1}\rvert}
+\newcommand{\expt}[1]{\langle{#1}\rangle}
+\newcommand{\red}[1]{{\bf\color{LancsRed}{#1}}}
+\newcommand{\blue}[1]{{\bf\color{NavyBlue}{#1}}}
+\newcommand{\green}[1]{{\bf\color{ForestGreen}{#1}}}
+\newcommand{\mred}[1]{{\color{LancsRed}{#1}}}
+\newcommand{\mblue}[1]{{\color{NavyBlue}{#1}}}
+\newcommand{\mgreen}[1]{{\color{ForestGreen}{#1}}}
+
+% }}*
+
+% *{{ title, subtitle, inst., date
+\title{\large{Modelling charge complexes in 2D
+semiconductors, and their heterostructures}}
+\subtitle{CDT Summer Conference 2018}
+
+% authors and institutions
+\author{\textbf{Ryan J. Hunt}\inst{1},
+        Neil D. Drummond\inst{1} \\
+        and Vladimir I. Fal'ko\inst{2}}
+
+%\author{Ryan Hunt}
+
+\institute[]{\
+  \inst{1}
+  Department of Physics,\\
+  Lancaster University
+  \and
+  \inst{2}
+  National Graphene Institute,\\
+  University of Manchester
+}
+
+% date
+\date{2${}^{\text{nd}}$ July, 2018}
+
+% }}*
+
+% *{{ bibliography setup
+\usepackage[backend=bibtex, style=phys]{biblatex}
+\bibliography{refs}
+\renewcommand{\footnotesize}{\scriptsize}
+\AtEveryCitekey{\clearfield{title}
+                \clearfield{pagetotal}
+                \clearfield{pages}
+                \clearfield{doi}}
+\renewcommand*{\bibfont}{\footnotesize}
+
+% }}*
+
+% *{{ graphics on front page
+\titlegraphic{\vspace*{-3.1cm}\includegraphics[width=3cm]{figs/lan_logo.png}
+\hfill\includegraphics[width=3cm]{figs/nownano_logo.png}}
+
+% }}*
+
+% *{{ titlepage + toc
+
+% Section and subsections will appear in the presentation overview
+% and table of contents.
+
+\begin{document}
+
+\begin{frame}[plain]
+  \titlepage\end{frame}
+
+%\begin{frame}{Outline}
+%  \tableofcontents
+%\end{frame}
+
+% contents at ssubsection starts - comment to get rid
+\AtBeginSection[]
+{\begin{frame}<beamer>{Outline}
+  \tableofcontents[currentsection]
+  \end{frame}}
+
+% }}*
+
+% }}* End Preamble
+
+% *{{ ``Modelling''
+\begin{frame}{``Modelling''}
+
+For me, this means using \textit{quantum Monte Carlo} (QMC) methods.
+% An alternative might be density functional theory.
+QMC relies on random sampling techniques, which can be used (with
+\textsc{casino}\footfullcite{Needs2009}) to solve the many-body
+Schr\"{o}dinger equation:
+
+\begin{equation}
+  \left[-\dfrac{1}{2}\nabla^2_{\bf R} + \mred{V({\bf R})}\right]\Psi({\bf R}) =
+  E\Psi({\bf R}),\ {\bf R}=\{{\bf r}_1,\ldots,{\bf r}_{\rm N}\} \label{eq:sch}
+\end{equation}
+
+{\bf Main point:} This is a \red{hard problem}. ${\rm N}$ might be
+6,\footnote{~~ $\sim$ charge complex in the effective mass approximation} but
+it might be 60, or even 600\footnote{~~ $\sim$ charge complex in ``heroic''
+QMC}\ldots
+
+\begin{itemize}
+  \item QMC deals with it, without \textit{excessively muddying} $V({\bf R})$.
+\end{itemize}
+
+\end{frame}
+% }}*
+
+% *{{ Quintons in TMDCs
+\begin{frame}{Quintons in monolayer TMDs\footfullcite{Mostaani2017}}{A.k.a. ``charged biexciton'', but
+that's no fun.}
+
+\begin{figure}[H]
+  \floatbox[{\capbeside\thisfloatsetup{capbesideposition={left, center},
+  capbesidewidth=0.7\textwidth}}]{figure}[\FBwidth]
+  {\caption{A \textit{quinton} (XX$^{-}$, pictured) is a
+  \textit{hypothetical} bound state of five particles in a
+  semiconductor.}\label{fig:quinton}}
+  {\includegraphics[width=0.3\textwidth]{figs/quinton.png}}
+\end{figure}
+% In the 2D semiconductors, (quasi-)electrons and holes can be thought of as free
+% particles with an effective mass. Their interaction is {\bf screened} by the
+% presence of the core electronic states, and the ions.
+
+We predicted that quintons would be stable in monolayers of
+TMDCs. Recent experiments corroborate this
+claim.\footfullcite{Hao2017}$^{,}$\footnote{~~ 1806.03775, 1805.04950,
+1802.10247}
+
+{\bf Disclaimer:} Our model neglects valley effects, these would act to
+alter interactions at short-range.
+
+\end{frame}
+% }}*
+
+% *{{ Interlayer complexes in heterobilayers
+\begin{frame}{Interlayer complexes in heterobilayers of
+TMDs\footfullcite{hbl_paper}}
+
+\begin{minipage}[t]{0.24\textwidth}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{figs/hbl_teaser.pdf}
+\end{figure}
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.74\textwidth}
+\begin{itemize}
+  \item Optical properties of type-II TMD heterobilayers are dominated by
+  interlayer complexes bound to impurity centers.
+\end{itemize}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{figs/doh_diag.png}
+  \caption{(one) Diagram (of four) representing D$^{0}$ recombination with
+  h$^{+}$.}
+\end{figure}
+
+\end{minipage}%
+
+\end{frame}
+% }}*
+
+% *{{ ``Heroic'' QMC
+\begin{frame}{``Heroic'' electronic structure
+calculations\footfullcite{gaps_paper}}
+\begin{minipage}[t]{0.75\textwidth}
+
+\begin{itemize}
+
+  \item[Q] Can we access the optoelectronic properties of a material by knowing
+  only the atomic numbers of its constituents?
+
+\vspace{.5cm}
+
+  \item[A] {\bf Yeah}, but beware:
+
+  \begin{itemize}
+    \item It's not cheap (CPU time).
+    \item Technical difficulties: finite size effects, variational collapse.
+    \item Sometimes, the electronic problem is not the whole story\ldots
+  \end{itemize}
+
+\end{itemize}
+
+
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.25\textwidth}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\linewidth]{figs/heman.png}
+\end{figure}
+\end{minipage}%
+\begin{itemize}
+  \item Paper is mostly technical, we do consider excitons in phosphorene.
+\end{itemize}
+\end{frame}
+% }}*
+
+% *{{ Next steps: intro to the Mahan exciton
+\begin{frame}{The Future}
+
+My next 2D materials project will concern charge complexes at finite
+density.
+
+\begin{itemize}
+  \item Superfluidity of excitons in vdW crystals? {\tiny (needs thought)}
+  \item The \textit{\green{Mahan exciton}} (ME) in 2D ``metals''?\footnote{~~
+  2D semiconductors, at high density.} {\tiny (thinking done)}
+\end{itemize}
+
+% The Mahan exciton is, effectively, the state described by a hole immersed
+% in an electron gas (at sufficiently high density).\footnote{Beyond what you
+% might typically achieve in a PL experiment.}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{figs/mahan_ipe.png}
+\end{figure}
+
+% i.e.\ \textit{Ewaldise} the Keldysh interaction and use it in model
+% calculations.
+
+\end{frame}
+% }}*
+
+% *{{ The Mahan exciton
+\begin{frame}{The Mahan Exciton}{``Excitons in Metals''}
+
+Formation coincides with onset of absorption in metals,\footnote{~~ Most
+clearly at low temperature\ldots} in a feature known as the ``Fermi Edge
+Singularity'' (FES).\footfullcite{Mahan_book,Mahan_PRL} \red{Anderson} and
+\blue{Mahan} studied this, FES boils down to spectral function:
+
+\begin{equation}
+  A(\omega) =
+  A^{(0)}(\omega)\underbrace{\mred{\Theta(\omega-\omega_T)}}_{\text{Orth.
+  Catastrophe}}
+  {\overbrace{\mblue{\left(\dfrac{\xi_{0}}{\omega-
+  \omega_{T}}\right)}^{\mgreen{\alpha}}}^{\text{e-h int.}}}.
+\end{equation}
+
+(In practice, you'd expect to see an increasingly asymmetric peak appear
+in PL measurements at lower and lower temperatures.)
+
+%$\alpha$ is affected by both physical effects.
+
+% Explain line shape, experimental signatures, FS ``shake-up'' and Anderson's
+% orthogonality catastrophe?
+
+% Sensitivity of the orthogonality issue to interaction strength (and form).
+
+\end{frame}
+
+\begin{frame}{ME II}
+
+\begin{itemize}
+  \item ME a distinctly many-body effect -- ``exciton'' is a \textbf{misnomer}.
+
+  \item To properly describe ME in doped 2D SCs, would need to account for all
+  electrons, ions.\ldots Such ``heroic''-scale realistic computations are
+  hard.\footnote{~~ At least for mere mortals with finite computer power.}
+
+  \item Can we do \textit{something}\ldots? \green{I think so}.
+
+  \item ME has been studied in (Coulomb) 2DEG,~\footfullcite{Spink_ME} but key
+  ingredient in (\textit{bona fide}) 2D is screening. Options:
+
+\begin{enumerate}
+
+  \item ``Heroic'' calculations $\rightarrow$ screening \blue{emergent} from
+  $V({\bf R})$.
+
+  \item Devise a clever model $\rightarrow$ screening \blue{modelled}. (Other
+  clever models exist for the
+  crossover\ldots\footfullcite{Efimkin2017,Efimkin2018})
+
+\end{enumerate}
+\end{itemize}
+
+\end{frame}
+% }}*
+
+% *{{ thanks and end document
+\begin{frame}[plain]
+\begin{center}
+  {\Large Thank you all for listening, and thanks to my
+collaborators:}
+\end{center}
+
+\vfill
+
+\begin{minipage}[t]{0.45\textwidth}
+
+{\bf Manchester (\textit{NGI}):}
+\begin{itemize}
+  \item M. Danovich
+  \item D. A. Riuz-Tijerina
+  \item V. I. Fal'ko
+\end{itemize}
+
+\vspace{0.5cm}
+
+{\bf Cambridge (\textit{CGC}):}
+\begin{itemize}
+  \item E. Mostaani
+\end{itemize}
+
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.45\textwidth}
+
+{\bf Japan (\textit{JAIST}):}
+\begin{itemize}
+  \item R. Maezono
+  \item G. Prayogo
+\end{itemize}
+
+\vspace{0.5cm}
+
+{\bf Lancaster:}
+\begin{itemize}
+  \item D. M. Thomas
+  \item M. Szyniszewski
+  \item N. D. Drummond
+  \item \textcolor{gray}{O. Witham (Frankfurt)}
+\end{itemize}
+
+\end{minipage}%
+\end{frame}
+
+\begin{frame}[t,allowframebreaks]{References}
+
+\printbibliography[]
+
+\end{frame}
+
+\end{document}
+% }}*

@@ -1,0 +1,87 @@
+[duration]
+50
+[font_size]
+21
+[notes]
+### 1
+* Summary of recent work
+
+* Outlook for QMC methods
+### 3
+* Gaps defining property of SCs.
+
+* Sets up for application: LED | PV cell ...
+
+* Control over Eg -> beat conventions. E.G. Beat S-Q limit on PVs with gap tuning! (tandem cells)
+### 4
+* E_N are N-particle system TOTAL ENERGIES.
+
+* Simplest expressions could imagine.
+
+* QMC generally: Direct, intuitive route into exploration of correlation effects.
+### 5
+* Bob rightly concludes that stuff is described by eqn. in blue. Problem: solving that hard.
+
+* Laughlin wfn not sol. to this, but ingredients common: Slater (VdM det.) + additions.
+### 6
+* Alternatives to QMC obv. exist.
+
+* Historically bad for excited states.
+
+* DFT -> "gap problem" (reverse in HF).
+* MBPT -> Hedin.-> start how?
+* QC -> scale like N^6-7...
+### 7
+* QMC is:
+ - direct like QC
+ - syst. improv. like MBPT
+ - cubic (or more) scaling like DFT.
+
+* Essentially /the/ numerical theory for many-body physics (at worst a requirement for the others!).
+### 9
+* VMC wfn: antisymm bit, dyn. corr. bit.
+
+* {a} typically end up being p coeffs.
+
+* MC integ. used, + MH sampling of ||^2, to form avgs. MC integ better for 2e+ (depends on what comparing to)
+### 10
+* Explicit example: hydrogen(-like atom).
+
+* 1e- (or distinguishable particles), only need corr. factor. Write as p. in e-N distances.
+
+* vary {a} under VP to get closer to eig.
+### 11
+* Jastrow does other stuff: if div. interact. need "cusp condition".
+
+* Dyn. Corr. critical for VdW/disp interaction.
+
+* Walk through CCs.
+### 12
+* DMC > VMC: the real reason we do MC.
+
+* (IS)ITSE: simulate evolution in imag time, use approx. gf to sample R' from R.
+
+* Projects out high energy comps. E_T like a "thermostat" (no, really...).
+### 13
+* Take inf. imag. time lim., with a few caveats.
+
+* GF known in limit of small t -> bias.
+* pop control -> bias.
+* FS effects -> need to treat/extrap.
+* FNA: eff. uncontrolled: local BC to maintain SnR.
+### 14
+* Was an assumption for a while.
+* Gen. VP apply w/ symm. (expl. orthogon. expensive!)
+* FN-DMC GS VP an excited state of bosonic GS (+/- perm irrep).
+* Trans. group important in gaps.
+### 16
+* "noble" for a reason. closed shell.
+
+* As strip e-, density grows, nodal error in energies e(n) known to grow.
+* Does it cancel well enough?
+
+* If doesn't for Ne, how can it for a molecule / solid...?
+### 17
+* Well, busy slide, but obv not.
+
+* Benchmark calcs from various sources, some might even be QMC, definitely possible to do better, testing the bare minimum here (1 det, 1 jastrow).

@@ -1,0 +1,467 @@
+% *{{ preamble
+\documentclass[12pt, pdf, hyperref={draft}, usenames, dvipsnames]{beamer}
+\usepackage{libertine, textcomp, amssymb, wasysym, color, ulem, verbatim}
+\usepackage{floatrow, subcaption}
+\usepackage[makeroom]{cancel}
+\usepackage{mathtools}
+% hide controls
+\usenavigationsymbolstemplate{}
+\usepackage[T1]{fontenc}
+\synctex=1
+\setbeamertemplate{caption}[numbered]
+% }}*
+
+% *{{ item colouring and themes
+\usecolortheme{beaver}
+\setbeamertemplate{footline}[frame number]
+\definecolor{LancsRed}{HTML}{B5121B}
+\setbeamercolor{item}{fg=LancsRed}
+\setbeamercolor{title}{fg=LancsRed}
+\setbeamercolor{structure}{fg=LancsRed}
+\setbeamercolor{frametitle}{fg=LancsRed}
+\setbeamercolor{footnote mark}{fg=LancsRed}
+\setbeamercolor{footnote}{fg=LancsRed}
+\setbeamercolor{bibliography entry author}{fg=LancsRed}
+\setbeamercolor{bibliography entry title}{fg=black}
+\setbeamercolor{bibliography entry note}{fg=black}
+\setbeamercolor{section in toc}{fg=LancsRed}
+%\setbeamercolor{subsection in toc}{fg=gray}
+\newcommand{\gitem}[1]{\setbeamercolor{item}{fg=ForestGreen}\item[$\checkmark$] #1}
+\newcommand{\bitem}[1]{\setbeamercolor{item}{fg=LancsRed}\item[$\times$] #1}
+\newcommand{\nitem}[1]{\setbeamercolor{item}{fg=NavyBlue}\item[$-$] #1}
+% }}*
+
+% *{{ niceties
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\e}{\mathrm{e}}
+\newcommand{\ket}[1]{\lvert{#1}\rangle}
+\newcommand{\bra}[1]{\langle{#1}\rvert}
+\newcommand{\expt}[1]{\langle{#1}\rangle}
+\newcommand{\red}[1]{{\bf\color{LancsRed}{#1}}}
+\newcommand{\blue}[1]{{\bf\color{NavyBlue}{#1}}}
+\newcommand{\green}[1]{{\bf\color{ForestGreen}{#1}}}
+
+% }}*
+
+% *{{ title, subtitle, inst., date
+\title{Quantum Monte Carlo Methods in \\
+       Solid State Physics}
+% \subtitle{}
+
+% authors and institutions
+%\author{\emph{Ryan J. Hunt}\inst{1},
+%        Neil D. Drummond\inst{1} \\
+%        and Vladimir I. Fal'ko\inst{2}}
+
+\author{Ryan Hunt \\ Physically Speaking \\ 20$^{\text{th}}$ June, 2017 \\
+\vspace*{0.5cm}\includegraphics[width=2cm]{figs/dice.png}}
+
+%\institute[]{
+%
+%  \inst{1}
+%  Department of Physics,\\
+%  Lancaster University
+%  \and
+%
+%  \inst{2}
+%  National Graphene Institute,\\
+%  University of Manchester}
+%
+\date{}
+
+% }}*
+
+% *{{ bibliography setup
+\usepackage[backend=bibtex]{biblatex}
+\bibliography{dmc_bib}
+\renewcommand{\footnotesize}{\scriptsize}
+\AtEveryCitekey{\clearfield{title}
+                \clearfield{pagetotal}
+                \clearfield{pages}}
+
+% }}*
+
+% *{{ graphics on front page
+\titlegraphic{\vspace*{-4.5cm}\includegraphics[width=3cm]{figs/lan_logo.png}
+\hfill\includegraphics[width=3cm]{figs/nownano_logo.png}}
+
+% }}*
+
+% *{{ titlepage + toc
+
+% Section and subsections will appear in the presentation overview
+% and table of contents.
+
+\begin{document}
+
+\begin{frame}[plain]
+  \titlepage\end{frame}
+
+%\begin{frame}{Outline}
+%  \tableofcontents
+%\end{frame}
+
+% contents at ssubsection starts - comment to get rid
+\AtBeginSection[]
+{\begin{frame}<beamer>{Outline}
+  \tableofcontents[currentsection]
+  \end{frame}}
+
+% }}*
+
+% *{{ the quantum many-body problem
+\section{The (Quantum) Many-Body Problem}
+\subsection{Why is this relevant for solid state physics?}
+
+\begin{frame}{Solid State Physics}
+
+Solid State Physics is intrinsically many-body in nature. Solids
+comprise of {\itshape\/many bodies}.
+
+\begin{figure}[H]
+  \floatbox[{\capbeside\thisfloatsetup{capbesideposition={left, center},
+  capbesidewidth=0.5\textwidth}}]{figure}[\FBwidth]
+  {\caption*{``The underlying physical laws necessary for the
+  mathematical theory of a large part of physics and the whole of chemistry are
+  thus completely known, and the difficulty is only that the exact application
+  of these laws leads to equations much too complicated to be
+  soluble.'' \\ \hfill -- Paul Dirac (1929).}\label{fig:dirac}}
+  {\includegraphics[width=0.35\textwidth]{figs/dirac_1929.jpg}}
+\end{figure}
+\end{frame}
+
+\begin{frame}{The Quantum Many-Body Problem}
+\begin{block}{Problem Statement}
+  \begin{itemize}
+    \item Solve:
+    \begin{equation}
+      \mathcal{\hat H}\ket{\Psi_\lambda} = E_\lambda\ket{\Psi_\lambda},
+    \end{equation}
+    with
+    \begin{align}
+      \mathcal{\hat H} = &-\dfrac{\hbar^2}{2m_e}\sum_i \nabla^2_i
+      -\sum_{i,I} \dfrac{Z_I e^2}{\lvert {\bf r}_i - {\bf R}_I\rvert}
+      +\dfrac{1}{2}
+      \sum_{i \neq j}\dfrac{e^2}{\lvert {\bf r}_i -
+      {\bf r}_j\rvert} \nonumber \\
+      &- \cancelto{\text{0}}{\sum_I \dfrac{\hbar^2}{2M_I}\nabla^2_I} +
+      \dfrac{1}{2}
+      \sum_{I \neq J} \dfrac{Z_I Z_J e^2}{\lvert {\bf R}_I - {\bf R}_J \rvert}.
+    \end{align}
+    for $E_\lambda$ and $\ket{\Psi_\lambda}$. Hint: don't really try this.
+  \end{itemize}
+\end{block}
+\end{frame}
+
+\subsection{Why is this a hard problem?}
+\begin{frame}{Why is this hard?}
+\begin{itemize}
+  \item Let ${\bf R} = \{ {\bf r}_1, \ldots, {\bf r}_{N_e} \}$ be a set of
+  e$^-$ positions in $3N_e$-dimensions.
+
+  \item \red{Curse of dimensionality:} $\Psi({\bf R})$ doesn't
+  factorise, the \# of antisymmetric combinations of basis
+  functions\footnote{Also known as \textit{Slater
+  determinants}.} needed to express $\Psi$ goes like $\e^{N_e}$.
+\end{itemize}
+
+\begin{figure}[H]
+  \floatbox[{\capbeside\thisfloatsetup{capbesideposition={right, center},
+  capbesidewidth=0.6\textwidth}}]{figure}[\FBwidth]
+  {\caption*{``I cannot foresee an advance in computer science which can
+  minimize a quantity in a space of $10^{150}$ dimensions.'' \\ \hfill
+-- Walter Kohn, Nobel Lecture (1998).}\label{fig:kohn}}
+  {\includegraphics[width=0.25\textwidth]{figs/kohn.jpg}}
+\end{figure}
+
+\end{frame}
+
+% }}*
+
+% *{{ qmc methods
+
+\section{Quantum Monte Carlo Methods}
+
+\begin{frame}{Quantum Monte Carlo (QMC) Methods}
+\begin{itemize}
+\item Solid State theory has taken a lot from ``single-particle''
+theories.
+
+\item We've learned that these \red{fail} to describe certain important bits
+of physics (many-body effects, electronic correlation).\footnote{Major
+consequences include: misclassification of metals / semiconductors, systematic
+underestimation of energy gaps, systematic failure to describe dispersion
+interactions, and the inability to describe many-particle bound states.}
+
+\item Quantum Monte Carlo methods are \blue{strikingly different}.
+\end{itemize}
+\end{frame}
+
+\subsection{Variational Monte Carlo}
+
+\begin{frame}{Variational MC}
+\begin{itemize}
+  \item In Variational MC, we evaluate various quantities, e.g.
+  \begin{equation}
+    E_T = \dfrac{\int\dd{\bf R} \lvert \Psi_T({\bf R})\rvert^2
+    \overbracket{\left[{\Psi_T({\bf R})}^{-1} \mathcal{\hat H} \Psi_T({\bf R})
+    \right]}^{\text{``Local Energy''}}}
+    {\int\dd{\bf R} \lvert \Psi_T({\bf R})\rvert^2}
+  \end{equation}
+  with stochastic techniques (Metropolis algorithm to sample $\lvert \Psi_T
+  \rvert^2$, Monte Carlo integration with subsequent samples).
+
+  \item This allows us to evaluate the energies, variances, \textit{etc} of
+  \green{trial wavefunctions}, $\Psi_T$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{VMC Trial Wavefunctions}
+\begin{itemize}
+  \item We obviously don't want to add combinations of determinants.
+  Walter Kohn is still correct.
+
+  \item What we can do, however, is build on a single Slater determinant,
+  $\mathcal{D}$, and form
+  \begin{equation}
+    \Psi_{\text{SJ}} = \exp{\left[ \mathcal{J}_{\{\alpha\}}({\bf R})\right]}
+    \cdot \mathcal{D}({\bf R}),
+  \end{equation}
+  with $\mathcal{J}$ the \green{Jastrow exponent} (describes
+  correlation, amongst other things).
+
+  \item Aside: one of these ``other things'' is called the \green{Kato cusp
+  condition} -- an important property of exact many-body wavefunctions.
+\end{itemize}
+\end{frame}
+
+\subsection{Diffusion Monte Carlo}
+
+\begin{frame}{Diffusion Monte Carlo}
+\begin{itemize}
+  \item I spent some time telling you about how single-particle theories fail,
+  then I used a Slater determinant in VMC\@. \red{Why is this reasonable?}
+
+  \item VMC is not the whole story. Whilst useful, it is usually done as a
+  prelude to DMC\@.
+
+  \item DMC is a \blue{projector-based} method, relying on the general
+  fact:\footnote{This is imaginary time evolution, $t = i\tau$.}
+
+  \begin{equation}
+    \ket{\Psi_{\text{GS}}} = \lim_{\tau \rightarrow \infty} \exp{\left(-\tau
+    \mathcal{\hat H} \right)}\ket{\Psi_T}.
+  \end{equation}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Diffusion Monte Carlo (II)}
+
+\begin{itemize}
+  \item [Q] How do we do enact this projection? How do we \textit{evolve} in
+  imaginary time?
+
+  \item [A] An approximate (interacting) Green's function,
+  \begin{equation}
+  \Psi({\bf R}, \tau+\Delta \tau)
+  = \displaystyle\int G({\bf R} \leftarrow {\bf R'},\Delta \tau)
+  \Psi({\bf R'}, \tau) \dd{\bf R'}.
+  \end{equation}
+
+  \item We \green{don't represent / store $\Psi$}, we store configurations
+  \textit{distributed} as $\lvert\Psi\rvert^2$.\footnote{This is how we get
+  away with what Dr.\ Kohn rightly said was impossible!}
+
+  \item \red{Caveats:} Relies on interpretation of $\Psi$ as a probability
+  density - have to treat +/- regions separately!\footnote{This is the
+  \textit{fixed-node approximation} - and is our way of avoiding the so-called
+  ``sign-problem'' for fermions.}
+  %(but $\Psi$ is \textit{signed}\ldots) - we fix the \textit{nodes} of
+  %$\Psi$, and disallow moves in the DMC algorithm which would have crossed a
+  %node.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Diffusion Monte Carlo (III)}{Credit where credit is due\ldots}
+
+\begin{figure}[H]
+  \floatbox[{\capbeside\thisfloatsetup{capbesideposition={left, center},
+  capbesidewidth=0.5\textwidth}}]{figure}[\FBwidth]
+  {\caption*{``\ldots as suggested by \green{Fermi}, the time-independent
+  Schr\"{o}dinger equation \ldots can be interpreted as describing the
+  behaviour of a system of particles each of which performs a random walk,
+  i.e., diffuses isotropically and at the same time is subject to a
+  multiplication\ldots'' \\ \hfill -- {{\bf Nicholas Metropolis} \\
+  \hfill \& Stanislaw Ulam (1949)}.}\label{fig:metropolis}}
+  {\includegraphics[width=0.45\textwidth]{figs/metropolis.jpg}}
+\end{figure}
+
+\end{frame}
+
+% }}*
+
+% *{{ examples
+\section{Examples}
+\subsection{Charge complexes in semiconductor heterostructures}
+
+\begin{frame}{Trion Formation in Coupled Quantum Wells}{w/ Oliver Witham, and
+Neil Drummond}
+
+% \begin{block}{Coupled Quantum Wells}
+% Pairs of 2DEGs, separated by a distance, $d$, and electrically biased such
+% that $e^-$ are bound in a layer, $h^+$ in another.
+% \end{block}
+
+\begin{minipage}[t]{0.55\textwidth}
+
+\vspace{1cm}
+\begin{itemize}
+  \item Experimentalists are interested in shining lasers on ``real'' CQWs, and
+  looking for Bose-Einstein condensates of excitons.\footnotemark%
+  \vspace{0.5cm}
+
+  \item They've yet to find anything conclusive: Why?
+\end{itemize}
+\vspace{1cm}
+
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.4\textwidth}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{figs/cqw_biexc.pdf}
+  \caption{A schematic of the system in question, and the problem setup for the
+  ground-state biexciton.}
+\label{fig:biex}
+\end{figure}
+
+\end{minipage}%
+ \footnotetext{A particularly good group who have studied this extensively is
+ that of Ronen Rapaport. They shy away from calling what they have found a BEC,
+ instead naming it a ``correlated quantum liquid''.}
+\end{frame}
+
+\begin{frame}{What have we done?}
+  \begin{itemize}
+    \item Previously, the biexciton was thought to hinder the formation of a
+    condensate. It is stable for very large $d$ values.
+
+    \item [Q] Is it \blue{safe} to assume that the charged trions are less
+    stable than
+    the neutral biexcitons?
+
+    \item [A] \red{Nope.}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{What have we done? (II)}
+  \begin{itemize}
+    \item By solving the three-body Schr\"{o}dinger equation for this
+    system \textit{exactly} in DMC, we have found,
+
+    \begin{equation}
+      d_{\text{crit}}(X^{\pm}) \sim 10 \cdot d_{\text{crit}}(XX)
+    \end{equation}
+  \end{itemize}
+
+\begin{figure}[H]
+  \floatbox[{\capbeside\thisfloatsetup{capbesideposition={left, center},
+  capbesidewidth=0.32\textwidth}}]{figure}[\FBwidth]
+  {\caption{Trion binding energies against $d$ for two experimentally
+  relevant $e^-$/$h^+$ mass ratios, $\sigma$.}\label{fig:trion}}
+  {\includegraphics[width=0.7\textwidth]{figs/trion_sigma2_4.pdf}}
+\end{figure}
+
+\end{frame}
+
+
+\subsection{{\itshape\/Grown-up QMC}: 500+ quantum particles}
+
+\begin{frame}{{\itshape\/ Grown-up QMC}: 500+ quantum particles}{w/ Neil
+Drummond, Marcin Szyniszewski, and Ryo Maezono}
+\begin{itemize}
+  \item Modern Solid State Physics is now an arena in which we routinely
+  simulate the properties of \red{large}, \green{realistic} systems.
+
+  \item Traditionally, excited state properties have been very interesting:
+  excitonic effects, band gaps, \ldots
+
+  \item QMC is the most accurate means we have of studying these properties
+  for remotely realistic systems: competitor methods scale as high powers of
+    system size,\footnote{Often $\mathcal{O}(N_e^{6-7})$, vs. QMC - which is
+    usually $\mathcal{O}(N_e^3)$.} or get the \red{wrong answer}.\footnote{For
+    reasons that we now largely understand: correlation effects are critical!}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{What have we done?}
+
+  \begin{itemize}
+    \item By using DMC for large supercells of solid systems, we have
+    calculated:\footnote{or, are still calculating!}
+    \begin{itemize}
+      \item Quasiparticle and Excitonic energy gaps of \green{hexagonal BN},
+      cubic BN, diamond Si, SiO$_2$ ($\alpha$-quartz), phosphorene.
+
+      \item Charge-complex binding energies (excitons, and biexcitons) -
+      \textit{without} any over-simplifying approximations.
+    \end{itemize}
+    \item We have found that such large-scale excited state calculation are
+    possible, however, \textit{they can bite}.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Finite Size Effects}
+  \begin{itemize}
+    \item In large-scale QMC simulations, we are limited by $N_e$. We therefore
+    study systems of $\mathcal{O}(10)$ unit cells.
+  \end{itemize}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.68\linewidth]{figs/bulk_qpgaps.pdf}
+  \caption{Quasiparticle energy gaps in bulk hBN vs.\ system size.}
+\label{fig:bhbn_gaps}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}{Is all hope lost?}
+  \begin{itemize}
+    \item Probably not - hBN is, realistically, a \red{worst-case} scenario.
+    Why?
+    \begin{itemize}
+      \item Localisation vs.\ delocalisation of quasiparticles.
+      \item Anisotropic dielectric screening.
+      \item Flat bands, with \red{unusual features}.
+    \end{itemize}
+  \end{itemize}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[trim={2cm 6cm 2cm 6cm},clip,width=0.9\linewidth]
+  {figs/bhbn_gamma_cbm.png}
+  \caption{Band charge density isosurface of the (delocalised) $\Gamma_c$
+  band in bulk hBN\@. This quasi-electron is almost \textit{free}.}
+\label{fig:bhbn_gamma}
+\end{figure}
+
+\end{frame}
+
+% }}*
+
+% *{{ thanks!
+\begin{frame}[plain]
+\begin{center}
+  {\Huge Thank you all for listening} \\
+  \vspace{2cm}
+  {\small Incidentally, the QMC community is quite small. You all now know
+  more this topic than most condensed matter physicists!}
+\end{center}
+\end{frame}
+% }}*
+
+\end{document}
+

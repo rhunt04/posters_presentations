@@ -1,0 +1,674 @@
+% *{{ preamble
+\documentclass[12pt, pdf, hyperref={draft}, usenames, dvipsnames]{beamer}
+\usepackage{libertine, textcomp, amssymb, wasysym, color, ulem, verbatim}
+\usepackage{floatrow, subcaption}
+% hide controls
+\usenavigationsymbolstemplate{}
+\usepackage[T1]{fontenc}
+\synctex=1
+\setbeamertemplate{caption}[numbered]
+% }}*
+
+% *{{ item colouring and themes
+\usecolortheme{beaver}
+\setbeamertemplate{footline}[frame number]
+\definecolor{LancsRed}{HTML}{B5121B}
+\setbeamercolor{item}{fg=LancsRed}
+\setbeamercolor{title}{fg=LancsRed}
+\setbeamercolor{structure}{fg=LancsRed}
+\setbeamercolor{frametitle}{fg=LancsRed}
+\setbeamercolor{footnote mark}{fg=LancsRed}
+\setbeamercolor{footnote}{fg=LancsRed}
+\setbeamercolor{bibliography entry author}{fg=LancsRed}
+\setbeamercolor{bibliography entry title}{fg=black}
+\setbeamercolor{bibliography entry note}{fg=black}
+\setbeamercolor{section in toc}{fg=LancsRed}
+\newcommand{\gitem}[1]{\setbeamercolor{item}{fg=ForestGreen}\item[$\checkmark$] #1}
+\newcommand{\bitem}[1]{\setbeamercolor{item}{fg=LancsRed}\item[$\times$] #1}
+\newcommand{\nitem}[1]{\setbeamercolor{item}{fg=NavyBlue}\item[$-$] #1}
+% }}*
+
+% *{{ niceties
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\e}{\mathrm{e}}
+\newcommand{\ket}[1]{\lvert {#1} \rangle}
+\newcommand{\bra}[1]{\langle {#1} \rvert}
+\newcommand{\expt}[1]{\langle {#1} \rangle}
+\newcommand{\red}[1]{{\bf\color{LancsRed}{#1}}}
+\newcommand{\blue}[1]{{\bf\color{NavyBlue}{#1}}}
+\newcommand{\green}[1]{{\bf\color{ForestGreen}{#1}}}
+
+% }}*
+
+% *{{ title, subtitle, inst., date
+\title{Quantum Monte Carlo studies of \\
+       Energy Gaps in Semiconductors}
+\subtitle{CMT Group Meeting}
+
+\author{Ryan Hunt}
+
+\date{16$^{\text{th}}$ December, 2016}
+
+% }}*
+
+% *{{ bibliography setup
+\usepackage[backend=bibtex]{biblatex}
+\bibliography{dmc_bib}
+\renewcommand{\footnotesize}{\scriptsize}
+\AtEveryCitekey{\clearfield{title}
+                \clearfield{pagetotal}
+                \clearfield{pages}}
+
+% }}*
+
+% *{{ graphics on front page
+\titlegraphic{\vspace*{-2.5cm}\includegraphics[width=3cm]{figs/lan_logo.png}
+\hfill\includegraphics[width=3cm]{figs/nownano_logo.png}}
+
+% }}*
+
+% *{{ titlepage + toc
+
+% Section and subsections will appear in the presentation overview
+% and table of contents.
+
+\begin{document}
+
+\begin{frame}[plain]
+  \titlepage
+\end{frame}
+
+\AtBeginSection[]
+{ \begin{frame}<beamer>{Outline}
+    \tableofcontents[currentsection]
+  \end{frame} }
+
+% }}*
+
+% *{{ [S] Why QMC?
+\section{Why QMC?}
+
+\subsection{Firstly, what gaps and why?}
+% *{{ What gaps and why?
+\begin{frame}{What gaps and why?}{}
+  \begin{itemize}
+  \item There are actually \blue{two} bandgaps one could attempt to calculate
+
+  \item[ \bf \# 1: ] \red{Excitonic Gap}
+  \begin{equation}
+  \Delta_{Ex} = E^{\text{Pr}}_N-E_N
+  \end{equation}
+  which is the price, in energy, a photon must pay to create a \blue{bound}
+  electron-hole pair in the SC.
+  \end{itemize}
+  \vfill
+  \begin{figure}[H]
+
+  \centering
+    \includegraphics[width=0.8\textwidth]{figs/excitonic_gap.pdf}
+
+  \end{figure}
+
+\end{frame}
+
+% }}*
+
+% *{{ Gaps cont.
+\begin{frame}{Gaps cont.}{}
+  \begin{itemize}
+
+  \item[ \bf \# 2: ] \red{Quasiparticle Gap}
+  \begin{equation}
+  \Delta_{QP} = E_{N+1} + E_{N-1} - 2E_{N}
+  \end{equation}
+  the price a photon pays to create a \blue{free} electron, leaving behind a
+  hole in the SC.
+
+  \end{itemize}
+  \vfill
+  \begin{figure}[H]
+
+  \centering
+    \includegraphics[width=0.8\textwidth]{figs/quasiparticle_gap.pdf}
+
+  \end{figure}
+
+\end{frame}
+
+% }}*
+
+\subsection{Alternatives: Mean-field theories, $G_{x}W_{y}$, CC/CI}
+
+% *{{ How might we calculate these?
+\begin{frame}{How might we calculate these?}
+
+  \begin{block}{Mean-field theories}
+    \begin{itemize}
+    \item Hartree-Fock, Density Functional Theory and hybrids thereof solve
+    auxiliary problems
+    \begin{equation}
+    \left(-\dfrac{\nabla^2}{2} + v_{\text{eff}}({\bf r})\right) \psi_i({\bf r})
+    = \epsilon_i \psi_i({\bf r})
+    \end{equation}
+    with $v_{\text{eff}}$ an effective potential {\it we do not
+    \footnote{And indeed - may never know.} know in general}.
+    \item "Determine gaps" from differences in single-particle \red{Kohn-Sham}
+    or \red{Hartree-Fock} eigenvalues
+    $\epsilon_i({\bf k})$. {\it \color{Gray}Shady.}
+
+    \end{itemize}
+  \end{block}
+
+\end{frame}
+
+\begin{frame}{Why is it {\it \color{Gray}Shady}?}
+\begin{block}{Hartree-Fock Eigenvalues}
+\begin{itemize}
+  \item Hartree-Fock eigenvalues can be interpreted as electron addition
+  and removal energies (charged excitation energies).
+  \item However, HF theory includes \red{absolutely no} description of
+  electronic correlation (gaps typically 2 times too big).
+\end{itemize}
+\end{block}
+\begin{block}{Kohn-Sham DFT}
+\begin{itemize}
+  \item DFT includes {\it some} treatment of electronic correlation.
+  \item \red{BUT} it's locked away in an uncontrolled approximation - the {\it
+  exchange-correlation functional} - $E_{XC}[n({\bf r})]$.
+\end{itemize}
+\end{block}
+\end{frame}
+
+% }}*
+
+% *{{ QC Methods
+
+\begin{frame}{Quantum Chemistry Methods?}
+\begin{block}{Coupled Cluster}
+  \begin{itemize}
+    \item Based on the exponential ansatz
+    \begin{equation}
+    \ket{\Psi_{CC}} = \e^{\hat T}\ket{\Psi_{Ref.}}
+    \end{equation}
+    \item Size-extensive, cost scales as $n_{e}^{6-7}$ depending on particulars
+  \end{itemize}
+
+\end{block}
+
+\begin{block}{Full Configuration Interaction}
+  \begin{itemize}
+    \item Rather than circumventing exponential curse, embrace it
+    \begin{equation}
+    \ket{\Psi_{FCI}} = \sum_{symm.\ i}c_i\ket{\Psi_i}
+    \end{equation}
+  \end{itemize}
+
+\end{block}
+
+\end{frame}
+
+% }}*
+
+% *{{ GW Approximation
+
+\begin{frame}{The $G_xW_y$ Approximation}{}
+  \begin{itemize}
+  \item The \blue{self-energy}, $\Sigma$ can be approximated by the product of
+  the Green's Function $G$ and the screened Coulomb potential
+  $W$~\footfullcite{hedin1965new, aryasetiawan1998gw}.
+  \item If we can do this, we can solve the quasiparticle equation
+  \begin{multline}
+  \left( -\dfrac{\nabla_i^2}{2} + v_{\text{ion}} + v_{\text{H}} \right)
+  \psi_i({\bf r}) + \int\dd {\bf r'}\ \Sigma({\bf r}, {\bf r'}, E^{QP}_i)
+  \psi_i({\bf r'})\\ = E^{QP}_i \psi_i({\bf r})
+  \end{multline}
+  \item As before, but with non-local $\Sigma$ and hope of \blue{systematic
+  extension} (via {\it vertex corrections}).
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{$GW$ vs Perturbation Theory Proper}
+\begin{block}{Hedin's Equations\footfullcite{hedin1965new}}
+  These are exact statements of many-body perturbation theory\footnote{\ $n
+  \equiv ({\bf r}_n,t_n)$. All integrals over all of space-time.}. Don't they
+  look tractable.
+\footnotesize
+  \begin{align}
+    G(1,2) &= G_0(1,2) + \displaystyle\int\dd(34)\ G_0(1,3)\Sigma(3,4)G(4,2) \nonumber \\
+    \Sigma(1,2) &= i\displaystyle\int\dd(34) W(1,4)G(1,3)\Lambda(3,2,4) \nonumber \\
+    \Lambda(1,2,3) &= \delta(1,2)\delta(1,3) \nonumber + \displaystyle\int\dd(4567) \dfrac{\delta \Sigma(1,2)}{\delta G(4,5)}G(4,7)\Lambda(7,6,3)G(6,5)\nonumber \\
+    W(1,2)\footnotemark &= v(1,2) + \displaystyle\int\dd(34)\ W(1,3)v(2,4)P(3,4) \nonumber \\
+    P(1,2) &= -i\displaystyle\int\dd(34)\ G(2,3) \Lambda(3,4,1) G(4,2^+) \nonumber
+  \end{align}
+  \footnotetext{NB : some people split this into two, and define a dielectric
+  matrix separately. This requires more space + makes business of functional
+  derivatives stranger.}
+\end{block}
+\end{frame}
+
+% }}*
+
+% *{{ General Trends
+
+\subsection{General Trends}
+\begin{frame}{Short Summary}{Or, why is this presentation primarily about QMC?}
+\begin{block}{Mean-field theories}
+  \begin{itemize}
+    \gitem \green{Antisymmetry} of (approx.) many-body wavefunction
+    \bitem No real hope of systematic extension
+    \bitem Even in principle, can't extract gaps -
+    $E^{N}_{tot}, n^{N}({\bf r})$ only
+  \end{itemize}
+\end{block}
+
+\begin{block}{$G_xW_y$}
+  \begin{itemize}
+  \gitem Systematic extension feasible
+  \nitem Better than MFT on average
+  \bitem \red{Dependance on $G_0$, etc.}, full SC not cheap (or desirable)
+  \end{itemize}
+\end{block}
+
+\end{frame}
+
+% }}* frame end
+
+% }}* section end
+
+% *{{ [S] QMC Methods
+\section{QMC Methods}
+
+\subsection{Variational MC}
+
+% *{{ VMC
+\begin{frame}{QMC Methods\footfullcite{Foulkes2001}}
+  \begin{block}{Variational Monte Carlo}
+    \begin{itemize}
+
+      \item Endow a \blue{trial wavefunction} with
+      variational freedom:
+      \begin{equation}
+      \Psi({\bf R})=\underbrace{\exp{\left[\ \mathcal{J}_{\{\alpha\}}({\bf R})\
+      \right]}}_\text{\green{Our additions}}
+      \ \times \underbrace{\mathcal{D}({\bf R})}_\text{\red{DFT, HF, ...}}
+      \end{equation}
+      and optimise some functional of $\Psi$ by varying $\{ \alpha\}$.
+
+      \item The Jastrow factor, $\exp{\left[ \mathcal{J} \right]}$, allows
+      $\Psi({\bf R})$ to satisfy properties of the \blue{exact} many-electron
+      wavefunction\footfullcite{kato1957eigenfunctions}.
+
+      %\item MC integration to extract expt. values of $\Psi({\bf R})$.
+
+    \end{itemize}
+  \end{block}
+
+\end{frame}
+
+% }}*
+
+\subsection{Diffusion MC}
+
+% *{{ Diffusion MC
+
+\begin{frame}{QMC Methods II}
+  \begin{block}{Diffusion Monte Carlo}
+    \begin{itemize}
+      \item DMC is a stochastic projector-based method for solving\footnote{$
+      i\tau = t$ (this is a "Wick rotated" Schr\"odinger equation).}
+
+      \begin{equation}
+      \mathcal{\hat H}\ \Psi({\bf R}, \tau)
+      = (E_T-\partial_{\tau})\Psi({\bf R}, \tau)
+      \end{equation}
+      or, if you like
+      \begin{equation}
+      \Psi({\bf R}, \tau+\Delta \tau)
+      = \displaystyle\int G({\bf R} \leftarrow {\bf R'},\Delta \tau)
+      \Psi({\bf R'}, \tau) \dd{\bf R'}
+      \end{equation}
+
+      \item \green{Separable} - time dependance is exponential
+      \footnote{$\{\Phi_i({\bf R})\} \rightarrow$ complete basis of eigenstates of the
+      interacting problem.}
+      \begin{equation}
+      \Psi(0) = \sum_n c_n \Phi_n \implies
+      \Psi(\tau) = \sum_n c_n \Phi_n\exp{\left[-(\mathcal{E}_n -
+      E_T)\tau\right]}
+      \end{equation}
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}{DMC - cont.}{Key things I won't have enough time to
+                           explain properly}
+  \begin{itemize}
+    \item \blue{Time steps}: don't know interacting system $G({\bf R}
+    \leftarrow {\bf R'})$, but know approximation valid for small $\Delta
+    \tau$.
+
+    \item \blue{Population control}: number of walkers in a DMC simulation
+    fluctuates. Control mechanism introduces (small, controllable) bias.
+
+    \item \red{Finite Size effects}: extrapolation to the thermodynamic limit
+    is a necessity, physics of FS critical.
+    \item \green{Gaps}: we might expect these problems to matter even less!
+  \end{itemize}
+\end{frame}
+% }}*
+
+\subsection{Excited State DMC}
+
+% *{{ Excited state DMC
+
+\begin{frame}{Excited State DMC}{Wait a second...}
+  \begin{itemize}
+    \item To make DMC\footnote{Even GS DMC.} workable, we have to \red{fix}
+    \blue{the} \green{nodes} of our trial wavefunctions.
+    \begin{figure}[H]
+      \floatbox[{\capbeside\thisfloatsetup{capbesideposition={left, center},capbesidewidth=0.5\textwidth}}]{figure}[\FBwidth]
+      {\caption{2D slice through 321D nodal surface of a 161-e$^-$ system
+      studied by Ceperley in 1991.}\label{fig:nodes}}
+      {\includegraphics[width=0.3\textwidth]{figs/nodes.pdf}}
+    \end{figure}
+    \item This is the \blue{only way} we can calculate excitation energies.
+    %\item FN error in a GS energy $\rightarrow$ second-order.
+    %\item FN error in an XS energy $\rightarrow$ first-order.
+  \end{itemize}
+\end{frame}
+
+% }}* frame end
+
+% }}* qmc methods section end
+
+% *{{ [S] Some Applications
+\section{Some Applications}
+\subsection{Small Molecules} % anthracene, benzothiazole, h2/o2??? [problem AE]
+
+% *{{ SM - Anthracene
+\begin{frame}{Small Molecules}
+
+  \begin{minipage}{0.50\textwidth}
+  \begin{block}{(A)nthracene - C$_{14}$H$_{10}$}
+
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figs/anth.png}
+    \end{figure}
+
+  \end{block}
+  \end{minipage}%
+  \begin{minipage}{0.50\textwidth}
+  \begin{block}{(B)enzothiazole - C$_{7}$H$_{5}$NS}
+
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figs/bzth.png}
+    \end{figure}
+
+  \end{block}
+  \end{minipage}
+
+\begin{itemize}
+  \gitem Both have a slew of associated $GW$/expt./QC data
+  \gitem Both are small enough for geometry to matter (Jahn-Teller distortion)
+  \gitem Both are desktop-sized DMC jobs ($N_e \sim$ 50 or so)
+\end{itemize}
+
+\end{frame}
+% }}* small molecules section end
+
+% *{{ SM - Benzothiazole
+\begin{frame}{Small Molecules - cont.}
+  \begin{block}{What do we find w/ QMC?}
+    \begin{table}[H]
+    \centering
+    \begin{tabular}{|c||ccc|}
+    \hline
+    Method &\ Expt. &\ DMC &\ DMC-JT \\ \hline \hline
+    $IP^A$ / eV&\ 7.439(6) &\ 7.34(4) &\ 7.28(5) \\ \hline
+    $IP^B$ / eV&\ 8.72(5)  &\ 8.92(3) &\ 8.81(3) \\ \hline
+    \end{tabular}
+    %\caption{Experimental and theoretical ionization potential (IP$ = E_{N-1}
+    %- E_N$) for (A) and (B).}
+    \label{table:ips}
+    \end{table}
+  \end{block}
+\begin{itemize}
+  \item Jahn-Teller effect is important\footnote{Ok, it isn't clear here.
+  In our tests of dimers / smaller molecules it is easier to make the
+  difference statistically significant.}!
+  \item (I would say) it's quite astounding that we can do this with a
+  \blue{single determinant}. Quantum chemists would cringe.
+\end{itemize}
+
+\end{frame}
+% }}*
+
+\subsection{Boron Nitride} % cubic and hexagonal
+
+% *{{ hbn
+\begin{frame}{Hexagonal Boron Nitride}
+
+\begin{minipage}{0.5\textwidth}
+\begin{block}{Monolayer}
+\begin{itemize}
+  \item Gaps \red{hard to determine}.
+\end{itemize}
+\end{block}
+\end{minipage}%
+\begin{minipage}{0.5\textwidth}
+\begin{block}{Bulk}
+\begin{itemize}
+  \item Gaps largely \green{known}.
+\end{itemize}
+\end{block}
+\end{minipage}
+\vfill
+\hrule
+\vfill
+\begin{itemize}
+  \item Dominant change after shedding dimensionality is the loss of
+  \blue{screening}.
+  \item DMC can access this physics, and treat both systems \green{fairly}.
+  \item If our bulk results stand up to scrutiny, can reason that we
+  have an \green{equally good} description of the physics in 2D (desirable).
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Hexagonal Boron Nitride}{Continued...}
+\begin{itemize}
+  \item Some of our monolayer and bulk results
+\end{itemize}
+\centering
+
+\begin{table}[H]
+\centering
+%\vspace{0.2cm}
+%\caption{Also : The calculated monolayer exciton binding
+%is $2.0(3)$ eV, with the bulk value to be determined.}
+\label{hbn_table}
+\begin{tabular}{|c||cc|}
+\hline
+System $\rightarrow$ &\ \ \  Bulk/\green{Expt.} \ \ &\ \ \ Monolayer \ \ \\ \hline \hline
+\ $\Delta_{Ex}(K_v \rightarrow K_c)$ / eV\ \ \ &\ \ \ $5.8(1)$/\green{5.971}$^\text{9}$ & 8.7(3)  \\
+\ $\Delta_{Ex}(K_v \rightarrow \Gamma_c)$ / eV\ \ \ &\ \ $5.69(8)$ & 7.5(3)  \\
+\ $\Delta_{Ex}(\Gamma_v \rightarrow \Gamma_c)$ / eV\ \ \ &\ \ \ $7.9(1)$ & --  \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{itemize}
+ \item We see that there is a \blue{significant} enhancement of
+  energy gaps on thinning to a monolayer.
+  \item \green{In agreement} with the best available
+  value \footfullcite{watanabe2004direct}(but again; phonons).
+\end{itemize}
+\end{frame}
+
+
+
+\begin{frame}{Hexagonal Boron Nitride}{An interesting test}
+\begin{itemize}
+  \item Gaps are \blue{energy differences}, do we necessarily need to
+  use computationally demanding sets of time steps?
+  \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{figs/dmc_gap_ts_test.pdf}
+    \caption{Some gap time step tests, in a (3 3 1) supercell of BhBN.}
+    \label{fig:ts_tests}
+  \end{figure}
+\end{itemize}
+\end{frame}
+% }}*
+
+% *{{ cbn
+\begin{frame}{Cubic Boron Nitride}
+\begin{minipage}{0.4\textwidth}
+\begin{itemize}
+  \item CBN is also a \green{very good insulator}.
+  \vspace{0.7cm}
+  \item \red{Understudied} w.r.t. hBN.
+\end{itemize}
+\end{minipage}%
+\begin{minipage}{0.6\textwidth}
+  \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.97\linewidth]{figs/cbn.png}
+    %\caption{D}
+    \label{fig:cbn}
+  \end{figure}
+\end{minipage}
+
+\begin{itemize}
+  \item Some ageing $GW$ studies to compare with\footfullcite{Satta2001,
+  Satta2004}, and is of general interest
+  given recent discoveries involving C/B/N materials\footfullcite{Pickard2016}.
+\end{itemize}
+\end{frame}
+% }}*
+
+\subsection{Silicon} % excitonic gaps in bulk - should have results then
+
+% *{{ silicon
+\begin{frame}{Silicon}{...in the diamond structure}
+  \begin{block}{Excitonic Gaps}
+    \begin{figure}[H]
+
+    \centering
+      \includegraphics[width=\textwidth]{figs/si_bs.pdf}
+
+    \end{figure}
+    \begin{itemize} % find reference for this
+      \item Exciton binding tiny - $\mathcal{O}(10^{-2})$ eV $ \implies
+      \Delta_{Ex} \sim \Delta_{QP}$.
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Silicon cont.}{Preliminary results}
+\begin{itemize}
+  \item So far, I have some preliminary results which are \red{without a
+  treatment of FS errors}\footnote{Actually, we are discovering that FS is
+  far less important for excitonic gaps. Don't expect significant change from
+  full FS treatment.};
+    \begin{table}[H]
+    \centering
+    \begin{tabular}{|c||ccccc|}
+    \hline
+    Gap / eV $\searrow$ &\ $L \rightarrow L$ &\ $\Gamma \rightarrow L$  &\
+    $\Gamma \rightarrow \Gamma$ &\ $\Gamma \rightarrow X$ &\ $X \rightarrow X$  \\ \hline \hline
+    DMC &\ 3.77(4) &\ 2.39(4) &\ 3.57(4)  &\ 1.24(4) &\ 4.55(4) \\ \hline
+    \texttt{ioffe}\footnotemark &\ --  &\ 2.0  &\ 3.4  &\ 1.2 &\ -- \\ \hline
+    \end{tabular}
+    %\caption{Experimental and theoretical ionization potential (IP$ = E_{N-1}
+    %- E_N$) for (A) and (B).}
+    \label{table:si_gaps}
+    \end{table}
+\footnotetext{At 300K. These are from numerous sources, which I will omit for
+length reasons. Sorry.}
+  \item Interestingly, $\Delta_{Ex}$ \green{agree nicely with experiment} (w/
+  deviation well within the realm of phononic effects).
+
+  \item \red{BUT} so do $\Delta_{QP}$...
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Silicon cont.}{A topic of current investigation}
+\begin{itemize}
+  \item Our proposed FS treatment scheme for \blue{QP Gaps} is;
+\begin{align}
+  \Delta(N) &= \Delta(\infty) + bv_{M}(N) \nonumber \\
+  &{\color{gray}+\ } \color{gray}{c\left( \Delta_{DFT}(N) - \Delta_{DFT}(\infty)  \right)}
+\end{align}
+where $v_M$ is the \blue{Madelung} constant evaluted for a given supercell
+(system size).
+  \item $\therefore$ for Si, where we know $\Delta_{Ex} \sim \Delta_{QP}$,
+  we don't expect to have the situation we do!
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Silicon cont.}
+  \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figs/qp_ex_gaps_extrap.pdf}
+    \caption{The possible FS behaviours of quasiparticle and excitonic gaps.}
+    \label{fig:}
+  \end{figure}
+
+\begin{itemize}
+  \item \blue{Take-home point} : We know FS effects are more difficult for
+  charged excitations. We are \green{open} to the idea that DMC could be
+  {\bf over}/{\color{gray}under} estimating QP gaps.\footnote{I am currently
+  determining the DMC excitation energies of various small molecules, in order
+  to try to get a handle on this.}
+
+\end{itemize}
+\end{frame}
+
+% }}* silicon section end
+
+% }}* some applications section end
+
+% *{{ [S] Summary
+\section*{Summary}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+  \item FN-DMC is capable of \blue{predictive} determination of
+  energy gaps\footnote{For the pessimists : at least for one important kind of
+  gap (excitonic). Investigations ongoing. Monsters may emerge.} for \green{diversely bonded} systems of all
+  dimensionalities.
+  \vspace{1cm}
+  \item The full extent to which computational savings can be made for DMC
+  energy gap calculations is \blue{unclear} and we will continue to probe!
+  \end{itemize}
+
+%  \begin{itemize}
+%  \item
+%    Outlook
+%    \begin{itemize}
+%    \bitem
+%    A \red{bad} item
+%    \gitem
+%      A \green{good} item
+%    \end{itemize}
+%  \end{itemize}
+\end{frame}
+
+% }}*
+
+% *{{ thanks!
+\begin{frame}[plain]
+\begin{center}
+  {\Huge Thank you all for listening!} \\
+  %\vspace{2cm}
+  %{\Large} Thanks to the NOWNano CDT / EPSRC for my funding.
+\end{center}
+\end{frame}
+% }}*
+
+\end{document}
+

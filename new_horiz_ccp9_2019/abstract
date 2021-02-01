@@ -1,0 +1,17 @@
+The accurate determination of the excited state properties of atoms, molecules,
+and solids is an outstanding goal of modern theoretical and computational
+physics. In the past few decades, progress on this problem has been made in
+many avenues; notably in those approaches based on density functional theory,
+many-body perturbation theory (often in the "GW" approximation), and the
+various quantum chemistry methods (coupled cluster, configuration interaction,
+other "post-Hartree-Fock" methods). Here, we present the results of a recent
+comprehensive study on the use of quantum Monte Carlo (QMC) methods for the
+description of excited states in condensed matter systems. We will give some
+examples on the treatment of atomic, molecular, and condensed matter systems,
+and some insight into the hurdles facing future highly-accurate QMC studies of
+excited states. Finally, we give an example of how QMC can be used to
+extract the exciton binding energy of 2D phosphorene from first principles,
+highlighting the specific issues that 2D systems present for first principles
+calculations.
+
+SLOT : 20 mins with questions.

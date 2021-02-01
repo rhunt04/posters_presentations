@@ -1,0 +1,945 @@
+% *{{ Actual preamble
+% *{{ preamble
+\documentclass[12pt, pdf, hyperref={draft}, usenames, dvipsnames]{beamer}
+\usepackage{libertine,textcomp,amssymb,wasysym,color,ulem,verbatim,calc,tikz}
+\usepackage{floatrow,subcaption,appendixnumberbeamer,dcolumn,booktabs,multirow}
+% hide controls
+\usenavigationsymbolstemplate{}
+\usepackage[T1]{fontenc}
+\setbeamertemplate{caption}[numbered]
+
+\newcolumntype{d}[1]{D{.}{.}{#1}}
+\newcommand\mc[1]{\multicolumn{1}{c}{#1}}
+
+% }}*
+
+% *{{ item colouring and themes
+\definecolor{LancsRed}{HTML}{B5121B}
+\setbeamercolor{item}{fg=LancsRed}
+\setbeamercolor{structure}{fg=black}
+\setbeamercolor{subsection in toc}{fg=gray}
+\setbeamercolor{bibliography entry note}{fg=black}
+\setbeamercolor{bibliography entry title}{fg=black}
+\setbeamercolor{bibliography entry author}{fg=LancsRed}
+
+\setbeamertemplate{frametitle}{\nointerlineskip
+    \begin{beamercolorbox}[wd=\paperwidth,ht=2.75ex,dp=1.375ex]{frametitle}
+        \hspace*{2ex}\insertframetitle \hfill
+        {\raisebox{1mm}{\textcolor{gray}{\small$\langle$\ \insertframenumber\ |
+        \inserttotalframenumber\ $\rangle$}}} \hspace*{1ex}%
+    \end{beamercolorbox}}
+
+\newcommand{\gitem}[1]{\setbeamercolor{item}{fg=ForestGreen}\item[$\checkmark$] #1}
+\newcommand{\bitem}[1]{\setbeamercolor{item}{fg=LancsRed}\item[$\times$] #1}
+\newcommand{\nitem}[1]{\setbeamercolor{item}{fg=NavyBlue}\item[$-$] #1}
+% }}*
+
+% *{{ margins
+\setbeamersize{text margin left=5mm, text margin right=5mm}
+% }}*
+
+% *{{ niceties
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\e}{\mathrm{e}}
+\newcommand{\ket}[1]{\lvert{#1}\rangle}
+\newcommand{\bra}[1]{\langle{#1}\rvert}
+\newcommand{\expt}[1]{\langle{#1}\rangle}
+\newcommand{\red}[1]{{\bf\color{LancsRed}{#1}}}
+\newcommand{\blue}[1]{{\bf\color{NavyBlue}{#1}}}
+\newcommand{\green}[1]{{\bf\color{ForestGreen}{#1}}}
+\newcommand{\mred}[1]{{\color{LancsRed}{#1}}}
+\newcommand{\mblue}[1]{{\color{NavyBlue}{#1}}}
+\newcommand{\mgreen}[1]{{\color{ForestGreen}{#1}}}
+\newcommand{\kfr}{{\bf k}_{\rm f}}
+\newcommand{\kto}{{\bf k}_{\rm t}}
+
+% }}*
+
+% *{{ title, subtitle, inst., date
+\title{Quantum Monte Carlo calculations of energy gaps from
+first-principles}
+
+% authors and institutions
+\author{Ryan J. Hunt}
+
+\institute[]{\
+  Department of Physics,\\
+  Lancaster University
+}
+
+% date
+\date{}
+
+% }}*
+
+% *{{ bibliography setup
+\usepackage[backend=biber, style=phys]{biblatex}
+\bibliography{refs}
+\renewcommand{\footnotesize}{\scriptsize}
+\AtEveryCitekey{\clearfield{title}
+                \clearfield{pagetotal}
+                \clearfield{pages}
+                \clearfield{doi}}
+\renewcommand*{\bibfont}{\footnotesize}
+
+% }}*
+
+% *{{ graphics on front page
+\titlegraphic{\includegraphics[width=4cm]{figs/lan_logo.png}
+\hfill\includegraphics[width=4cm]{figs/nownano_logo.png}}
+
+% }}*
+
+% *{{ titlepage + toc
+
+% Section and subsections will appear in the presentation overview
+% and table of contents.
+
+\begin{document}
+
+\begin{frame}[plain]
+  \titlepage
+\end{frame}
+
+\AtBeginSection[]
+{\begin{frame}<beamer>{Outline}
+ \tableofcontents[currentsection]
+\end{frame}}
+
+% }}*
+
+% }}* End Preamble
+
+\section{Motivation}
+
+\subsection{What's the problem?}
+
+% *{{ Problem
+\begin{frame}{What's the problem?}
+We'd like to be able to predictively model the (opto)electronic behaviour of
+materials. Because this could be {\it useful}.
+\vfill
+\begin{minipage}[t]{0.55\textwidth}
+\vspace{1.2cm}
+\begin{itemize}
+  \item Specifically, $\Delta_{\text{Ex.}}$, $\Delta_{\text{QP}}$, and $E^{\rm
+  X}_{\rm B}$ in semiconductors.
+  \item Don't define ``material heaven'', but are a start.
+  \item (The blue LED is blue for a reason.)
+\end{itemize}
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.4\textwidth}
+\vspace{0pt}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.75\linewidth]{figs/cv_gaps.pdf}
+  %\caption{Name}
+\label{fig:name}
+\end{figure}
+\end{minipage}%
+\end{frame}
+
+\begin{frame}{Energy gaps: definitions}
+
+The \blue{quasiparticle gap}, $\Delta_{\text{QP}}$, is defined as the
+difference between the CBM and the VBM:
+\begin{align}
+  &\Delta_{\text{QP}}(\kfr,\kto)={\cal E}_{\text{CBM}}(\kto)-
+  {\cal E}_{\text{VBM}}(\kfr)
+  \nonumber \\
+  &=\left[E_{{\rm N}+1}(\kto)-E_{\rm N}(\kto)\right]-
+    \left[E_{\rm N}(\kfr)-E_{{\rm N}-1}(\kfr)\right] \nonumber \\
+  &=E_{{\rm N}+1}(\kto)+E_{{\rm N}-1}(\kfr)-E_{\rm N}(\kto)-E_{\rm N}(\kfr),
+\end{align}
+The \blue{excitonic gap}, $\Delta_{\text{Ex.}}$, is defined as the energy
+difference between an excited $\rm N$-electron state and the ground
+$\rm N$-electron state:
+\begin{equation}
+  \Delta_{\text{Ex.}}(\kfr,\kto) = E^{+}_{\rm N}(\kfr, \kto) - E_{\rm N},
+\end{equation}
+
+Their difference is the \blue{exciton binding}.\footnote{~~The interaction
+energy of a quasielectron at $\kto$ and a quasihole at $\kfr$.}
+\end{frame}
+
+\begin{frame}{\ }
+\vspace{-1cm}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.6\linewidth]{figs/laughlin_slide.png}
+  \caption{Introductory slide from Laughlin's Nobel lecture.}
+\label{fig:laughlin_slide}
+\end{figure}
+\end{frame}
+
+% }}*
+
+\subsection{Why Quantum Monte Carlo (QMC)?}
+
+% *{{ Why QMC?
+\begin{frame}{Why Quantum Monte Carlo (QMC)?}
+What else?
+
+\begin{itemize}
+  \item Density functional theory (or HF | hybrids)
+  \begin{itemize}
+    \item Take differences in Kohn-Sham (Hartree-Fock) SP eigenvalues.
+  \end{itemize}
+  \item Many-body perturbation theory ($GW$ | $GW$-BSE | MP$n$)
+  \begin{itemize}
+    \item QP energies from QP equation (feat. self-energy, $\Sigma({\bf
+    k},\omega)$).
+  \end{itemize}
+  \item Quantum chemistry (post HF | CC | CI | FCI)
+  \begin{itemize}
+    \item Most similar to present: direct calculation of total energies.
+  \end{itemize}
+\end{itemize}
+\vfill
+Either too crude, too scattered, or too expensive.
+\end{frame}
+
+\begin{frame}{Why QMC - cont.}
+QMC methods:
+\begin{itemize}
+  \gitem Are highly accurate, and systematically improvable.
+  \gitem Are non-perturbative, and treat correlation effects exactly.
+  \gitem Have $\mathcal{O}({{\rm N}_{e}}^3)$ cost, not much worse in
+  ``abnormal'' cases.
+\end{itemize}
+
+Proof? Lots available, see reviews,~\footfullcite{Foulkes2001,Needs2009}
+or below.~\footfullcite{Ceperley1980}
+
+\begin{figure}[H]
+  \floatbox[{\capbeside\thisfloatsetup{capbesideposition={left, center},
+  capbesidewidth=0.5\textwidth}}]{figure}[\FBwidth]
+  {\caption{The basis of much modern electronic structure
+  theory.}\label{fig:cep}}
+  {\includegraphics[width=0.4\textwidth]{figs/ceperley.pdf}}
+\end{figure}
+\end{frame}
+% }}*
+
+\section{QMC Methods}
+
+\subsection{VMC and DMC}
+
+% *{{ VMC and DMC
+
+% *{{ VMC
+\begin{frame}{QMC Methods\footfullcite{Foulkes2001}}
+\begin{block}{Variational Monte Carlo}
+  \begin{itemize}
+    \item Endow a {\it trial} wavefunction with variational freedom:
+    \begin{equation}
+    \Psi({\bf R})=\underbrace{\exp{\left[\ \mathcal{J}_{\{\alpha\}}({\bf R})\
+    \right]}}_\text{\green{Our additions}}
+    \ \times \underbrace{\mathcal{D}({\bf R})}_\text{\red{DFT, HF, ...}},
+    \end{equation}
+    and pick $\{\alpha\}$.
+    \item MC integration used, for example, to evaluate
+    \begin{equation}
+    \bra{\Psi}\mathcal{\hat H}\ket{\Psi} = \displaystyle\int\dd {\bf R}\
+    |\Psi({\bf R})|^2
+    \left[\dfrac{\mathcal{\hat H}\Psi({\bf R})}{\Psi({\bf R})}\right]
+    \approx \sum_{i}\dfrac{\mathcal{H}({\bf R}_i)\Psi({\bf
+    R}_i)}{\Psi({\bf R}_i)},
+    \end{equation}
+    ($\{{\bf R}_i\}$ distributed as $|\Psi({\bf R})|^2$).
+  \end{itemize}
+\end{block}
+
+\end{frame}
+
+\begin{frame}{VMC - cont.}
+\begin{block}{Picking $\{\alpha\}$: a super-simple example}
+For example, a ``guessed'' H atom trial wave function might look like:
+
+\begin{equation}
+\Psi_{H}({\bf r}_e) =
+\exp{\left[\underbrace{(r_e-L)^C\Theta(L-r_e)}_{\text{Smooth
+cutoff}}\sum_{i=0}\alpha_i r^i_e\right]}.
+\end{equation}
+
+We use robust optimization algorithms to vary the $\{\alpha\}$ such that our
+guess looks more like an eigenstate.
+
+\begin{itemize}
+  \item Minimise $E$, $\sigma^2_{E}$, or another measure of spread, \ldots
+\end{itemize}
+
+\end{block}
+\end{frame}
+
+\begin{frame}{VMC - cont.}
+
+\begin{itemize}
+  \item {\it Jastrow factor} ($\exp{\left[ \mathcal{J} \right]}$) describes
+  $n$-body correlations {\bf explicitly} in real-space, and allows
+  $\Psi$ to satisfy properties of the {\bf exact} many-electron
+  wavefunction.\footnote{~~ Also critical for efficiently describing {\it
+  dispersion} interactions.}
+
+  \item E.g. the Kato~\footfullcite{Kato1957} cusp conditions:
+
+\end{itemize}
+
+\begin{minipage}[t]{0.25\textwidth}
+\vspace{0.75cm}
+\centering
+\hfill\includegraphics[width=\linewidth]{figs/pair.pdf}
+
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.65\textwidth}
+
+\begin{itemize}
+  \item As (1,2) coalesce, if $V(r_{12})$ diverges,
+  $T$ must also ($\mathcal{\hat H}={\hat T}+{\hat V}$).
+  \item Kinetic energy $\implies$ derivatives of $\Psi$ $\implies$ derivatives
+  of $\mathcal{J}$.
+  \item Fixes some of the $\{\alpha\}$.
+\end{itemize}
+
+\end{minipage}%
+
+\end{frame}
+
+% }}*
+
+% *{{ Diffusion MC
+
+\begin{frame}{QMC Methods II}
+  \begin{block}{Diffusion Monte Carlo}
+    \begin{itemize}
+      \item DMC is a stochastic projector-based method for solving
+      \begin{equation}
+      \mathcal{\hat H}\ \Psi({\bf R}, \tau)
+      = (E_T-\partial_{\tau})\Psi({\bf R}, \tau),
+      \end{equation}
+      or, if you like
+      \begin{equation}
+      \Psi({\bf R}, \tau+\Delta \tau)
+      = \displaystyle\int G({\bf R} \leftarrow {\bf R'},\Delta \tau)
+      \Psi({\bf R'}, \tau) \dd{\bf R'}.
+      \end{equation}
+      \item \green{Separable} ($\partial_\tau\mathcal{\hat H}=0$)
+      \footnote{~~ $\{\Phi_i\} \rightarrow$ complete basis of eigenstates of the
+      interacting problem.}
+      \begin{equation}
+      \Psi(0) = \sum_n c_n \Phi_n \implies
+      \Psi(\tau) = \sum_n c_n \Phi_n\exp{\left[-(\mathcal{E}_n -
+      E_T)\tau\right]}
+      \end{equation}
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}{DMC - cont.}
+  Effectively we take:
+  \begin{equation}
+  \lim_{\tau \rightarrow \infty} \Psi(\tau) \sim \Phi_{0},
+  \end{equation}
+  by having the DMC Green's function take configurations ${\bf
+  R}'\rightarrow{\bf R}$, with caveats:
+  \begin{itemize}
+    \item \blue{Time steps}: know $G({\bf R} \leftarrow {\bf
+    R'},\Delta\tau)$ in limit of small $\Delta
+    \tau$.
+
+    \item \blue{Population control}: number of walkers in DMC
+    fluctuates. Control mechanism introduces a bias.
+
+    \item \red{Finite-size (FS) effects}: extrapolation to TD limit
+    a necessity.
+
+    \item \red{Fixed-node approximation}: (non-local) antisymmetry enforced by
+    (local) boundary condition ($\Psi=0$ surface is fixed).
+
+  \end{itemize}
+  \vfill
+  \centering
+  \green{Gaps}: expect some of these to matter less!
+\end{frame}
+% }}*
+
+% }}*
+
+\subsection{Excited-state QMC}
+
+% *{{ Excited state DMC
+
+\begin{frame}{Excited State DMC}{Wait a second... what I said applies to ground
+states.}
+\vspace{0cm}
+In special circumstances, what I have just said
+also applies to the ground state {\it of a given
+symmetry}.\footnotemark~Key idea concerns
+excited-states and generalised variational principles
+\only<2->{\footnotetext{~~Actually, the variational principle on ground states
+in fixed-node DMC is an excited state one, fermion GS transforms as 1D irrep.
+of permutation group.}}
+
+  \begin{itemize}
+  \pause
+    \item \red{Jargon}: If trial wfn. transforms as a 1D irrep. of the symmetry group
+    of the Hamiltonian, have a variational principle on states of that
+    symmetry (could be excited state).~\only<2->{\footfullcite{Foulkes1999}}
+    \pause
+    \item \green{Simple practical upshot}: the many-body Bloch conditions for periodic
+    calculations mean that states with definite crystal momentum belong to a 1D
+    irrep. (of the translation group).
+  \end{itemize}
+\vfill
+There are {\it many} other means of obtaining variational
+bounds.\only<3->{~\footfullcite{Zhao2016,MacDonald1933,Hipes2011}}
+\end{frame}
+
+% }}* frame end
+
+\section{Case studies}
+
+\subsection{Atoms and molecules}
+
+% *{{ Atoms and molecules
+
+\begin{frame}{Intrinsic accuracy: Ne atom}
+
+The neon atom ground state is (famously) closed shell. None of the cations
+are, and there's a potential for build-up of nodal\footnote{~~FN-error
+$\equiv$ error arising from (local) B.C. on $\Psi$ ($\Psi=0$ ``surface''
+fixed to please Pauli).}
+error in IP.~\footfullcite{Rasch2014,Kulahlioglu2014}
+\begin{equation}
+\text{IP}(n) = E(n) - E(n-1),
+\end{equation}
+Q: Does this happen?
+\begin{figure}[H]
+  \floatbox[{\capbeside\thisfloatsetup{capbesideposition={left, center},
+  capbesidewidth=0.5\textwidth}}]{figure}[\FBwidth]
+  {\caption{DMC and FCI correlation energies of atoms versus atomic
+  number (from Rasch {\it et al.}). NB 30mHa $\sim$ 0.8
+  eV.}\label{fig:nodal_error}}
+  {\includegraphics[width=0.5\textwidth]{figs/nodal_error.png}}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Ne atom - cont.}
+  ``Exact'' $\implies$ expt. minus best est. relativistic correction.
+  \footfullcite{Chakravorty1993}
+  \begin{table}[H]
+  \centering
+  \begin{tabular}{c *{5}{d{3.5}}}
+  \multirow{2}{*}{$n$} & \multicolumn{5}{c}{IP($n$) (eV)} \\
+  & \mc{Exact}&\mc{SJ-VMC}&\mc{SJB-VMC}&\mc{SJ-DMC}&\mc{SJB-DMC}\\ \hline
+  1& 21.61333&22.08(2)&21.96(2) &21.72(1) &21.72(1) \\
+  2& 40.99110&41.48(2)&41.39(2) &41.10(1) &41.06(1) \\
+  3& 63.39913&63.44(2)&63.23(1) &63.35(2) &63.39(1) \\
+  4& 97.29312&97.91(2)&97.78(1) &97.75(2) &97.72(1) \\
+  5&126.28846&126.85(2)&126.72(2)&126.85(1)&126.79(1)\\
+  6&157.80001&158.43(2)&158.30(1)&158.25(2)&158.34(1)\\
+  7&207.04137&204.48(2)&204.56(1)&205.04(2)&205.26(1)\\
+  8&238.78949&238.10(1)&238.49(1)&238.70(2)&238.79(1)\\
+  \hline
+  \mc{\text{MAE}} & \mc{0\%} & 0.83\%    & 0.67\%    & 0.38\%    & 0.34\%
+  \end{tabular}
+  \end{table}
+\vspace{-0.2cm}
+So? IPs related to QP energies. More later!
+\end{frame}
+
+\begin{frame}{Molecules - dimers}
+\begin{itemize}
+  \item O$_2$: singlet/triplet, (near)degeneracy, multideterminants.
+\end{itemize}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.6\linewidth]{figs/o2_dimer/o2_dimer.pdf}
+\end{figure}
+\vfill
+\begin{itemize}
+  \item H$_2$: vibrations, quantum protons.
+\end{itemize}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.5\linewidth]{figs/h2_dimer/h2_dimer.pdf}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Dimers (cont.)\footfullcite{Hunt2018}}
+\begin{figure}[H]
+  \floatbox[{\capbeside\thisfloatsetup{capbesideposition={left, center},
+  capbesidewidth=0.3\textwidth}}]{figure}[\FBwidth]
+  {\caption{O$_2$ and H$_2$ dimer results.}\label{fig:dimers}}
+  {\includegraphics[width=0.6\textwidth]{figs/dimers.png}}
+\end{figure}
+
+\begin{itemize}
+  \item For O$_2$, also determined singlet-triplet splitting of 1.62(2)
+  [0.20(3)] eV, c.f.
+  0.9773 eV.
+  \item $\mathcal{D}$/$\Sigma_i\mathcal{D}_i$ and ability of QMC
+  to treat on equal footing is key!
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Molecules - nondimers}
+In terms of computational cost, QMC for small molecules (${\rm N}_e \sim 100$) is roughly on par with
+$GW$(-BSE). Recently, a slew of such studies have focussed on studying small
+molecules.
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.7\linewidth]{figs/combo.png}
+  \caption{C$_{14}$H$_{10}$ $\rightarrow$ C$_6$N$_4$ $\rightarrow$ C$_7$H$_5$NS
+  $\rightarrow$ BF$_3$.}
+\label{fig:combo}
+\end{figure}
+\begin{itemize}
+  \item Results vary significantly, and are $G_0$, $W_0$, $v_{\text{XC}}$
+  \ldots dependent.
+  \item Is QMC a worthy competitor in the realm of small molecules?
+\end{itemize}
+Example use: $T(E)$ in molecular electronics, for example. Determines $I$-$V$
+characteristics of a molecular junction.
+\end{frame}
+
+\begin{frame}{Nondimers (cont.)}
+\begin{minipage}[t]{0.45\textwidth}
+Anthracene (C$_{14}$H$_{10}$):
+\begin{itemize}
+  \item $\Delta_{\text{Ex.}}^{S=0,1}=3.07(3),2.36(3)$ eV. (PAH \&
+  \green{Hund}!).
+  \item Expt. says 3.38-3.433,
+  1.84-1.85$^{\star}$ eV.
+  \item No comparable $GW$.\footnotemark \\
+  \hspace{2cm}$\downarrow$
+\end{itemize}
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.45\textwidth}
+Benzothiazole (C$_7$H$_5$NS):
+\begin{itemize}
+  \item IP = $\underbrace{8.92(2)}_{\rm V}\rightarrow \underbrace{8.80(2)}_{\rm A}$ eV
+  \item Expt. says 8.72(5) eV [$\rm A$].
+  \item $GW$ says 8.2-8.5 eV [$\rm V$].
+\end{itemize}
+\end{minipage}%
+\footnotetext{~~Hummer \textit{et al.} studied mol.
+cry. anthracene: {\bf PRL 92(14)}, (2004). Unreferenced numbers found (w/ refs)
+in our article, excluded for space.}
+\vfill
+\begin{itemize}
+  \gitem QMC as tool for probing \blue{molecular excitons}. Relevant in
+  materials screening for biological imaging, for example. (FRET).
+  \bitem Relevant quantities are (really) resonance timescales.
+\end{itemize}
+\end{frame}
+% }}*
+
+\subsection{Bulk solids}
+
+% *{{ Bulk solids
+
+\begin{frame}{Bulk solids}
+
+We've studied Si, $\alpha$-SiO$_2$, and cubic BN in the current work. Previous
+QMC studies had claimed success in evaluation of ``QMC band
+structures'',~\footfullcite{Kent1998,Williamson1998}
+minus discussions of:
+
+\begin{minipage}[t]{0.35\textwidth}
+\vspace{0.3cm}
+\begin{itemize}
+  \item Finite-size errors.
+  \item Fixed-nodal errors.
+  \item $\Delta_{\text{QP}}$ vs. $\Delta_{\text{Ex.}}$.
+\end{itemize}
+\vspace{0.3cm}
+Will concentrate on Si here, exploring the above.
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.55\textwidth}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.9\linewidth]{figs/si.png}
+  %\caption{Si}
+\label{fig:silicon}
+\end{figure}
+\end{minipage}%
+\end{frame}
+
+\begin{frame}{Bulk solids: FS errors}
+\begin{itemize}
+  \item Able only to simluate a finite \textit{chunk} of material
+  (supercell), under PBCs.
+  \item Excitation energies are ``1/${\rm N}$'' effects. Need statistical
+  accuracy + careful FS treatment.
+\end{itemize}
+\begin{figure}[H]
+  \floatbox[{\capbeside\thisfloatsetup{capbesideposition={right, center},
+  capbesidewidth=0.5\textwidth}}]{figure}[\FBwidth]
+  {\caption{Uncorrected SJ-DMC gaps of Si vs. system size. Answer is,
+  basically, \red{no}. But\ldots error is quantifiable. Largely from
+  image-interactions (Madelung energy of QP).}\label{fig:si_gaps}}
+  {\includegraphics[width=0.5\textwidth]{figs/si_gaps.pdf}}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Bulk solids: Fixed-nodal error}
+\begin{itemize}
+  \item Probe with Backflow transformation:
+  \begin{equation}
+    {\bf r}_i \rightarrow {\bf x}_i = {\bf r}_i + {\boldsymbol \xi}_i({\bf R})
+  \end{equation}
+  which can change nodal surface.~\footfullcite{lopezrios2006}
+  \item Tested $\Delta_{\text{QP/Ex}}(\Gamma_{\rm v} \rightarrow \Gamma_{\rm
+  c})$ and $\Delta_{\text{QP}}(\Gamma_{\rm v} \overset{\sim}{\rightarrow}
+  \text{CBM})$, in $2\times2\times2$ supercell.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Bulk solids: Fixed-nodal error (cont.)}
+\begin{block}{We find:}
+ \begin{itemize}
+   \item Inclusion of backflow correlations:
+   \begin{itemize}
+     \item Lowers $\Delta_{\text{QP}}(\Gamma_{\rm v} \rightarrow \Gamma_{\rm
+     c})$ by 0.13 eV.
+     \item Lowers $\Delta_{\text{Ex.}}(\Gamma_{\rm v} \rightarrow \Gamma_{\rm
+     c})$ by 0.12 eV.
+   \end{itemize}
+   \item Re-optimisation of excited-state backflow functions (${\boldsymbol
+   \xi}_i({\bf R})$) further lowers:
+   \begin{itemize}
+     \item $\Delta_{\text{QP}}(\Gamma_{\rm v} \rightarrow \Gamma_{\rm
+     c})$ by 0.18 eV.
+     \item $\Delta_{\text{QP}}(\Gamma_{\rm v} \overset{\sim}{\rightarrow}
+  \text{CBM})$ by 0.20 eV.
+   \end{itemize}
+ \end{itemize}
+\end{block}
+ \vfill
+ \red{Point:} FN errors \red{not} insignificant ($\gtrsim 0.2$ eV), but can be
+ remedied\footnote{~~Always safe for QP gaps. Sometimes safe for Ex. gaps.} w/ backflow.
+\end{frame}
+
+\begin{frame}{Bulk solids: $\Delta_{\text{QP}}$ and $\Delta_{\text{Ex.}}$}
+In bulk Si $E^{\rm X}_B \sim 15$ meV.
+\begin{itemize}
+  \item Expect $\Delta_{\text{QP}} \sim \Delta_{\text{Ex.}}$ (in TD limit).
+  \item (potentially) qualitatively different FS effects, however.
+  \item \ldots but already seen that this doesn't happen in Si.
+\end{itemize}
+\vfill
+\begin{block}{Explanation:}
+  Confine an exciton too tightly, $E_{\text{K}}$ dominates, no binding, behave
+  effectively uncorrelated. Balance of supercell length scale and exciton
+  length scale important.
+\vfill
+  $\implies$ $a^{\star}_{\rm B}$ in Si is \blue{huge}. Cell never big enough to
+  accomodate ${\rm X}$.
+\end{block}
+\end{frame}
+
+\begin{frame}{Bulk solids: the old calculations (briefly)}
+No $q_{\bf k} \implies \Delta \uparrow$ \hfill
+Bad wfn. $\implies \Delta \uparrow$ \hfill
+FS effects $\implies \Delta \downarrow$
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\linewidth]{figs/perspective.jpg}
+  \caption{Perspective.}
+\label{fig:perspective}
+\end{figure}
+{\tiny \ldots and if you're trying to justify the need for many-body theory,
+you'd best not connect $\Delta_{\text{QP}}$ and
+$\Delta_{\text{Ex.}}$ by means of a M.-W. model!}
+\end{frame}
+% }}*
+
+\subsection{Phosphorene}
+
+% *{{ Phosphorene
+
+\begin{frame}{Phosphorene}
+A direct gap 2D semiconductor, with large exciton binding
+energy.\footfullcite{yang2015}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.6\linewidth]{figs/phos_spec_paper.jpg}
+  \caption{PL measurements of Phosphorene $n$-layers.}
+\label{fig:phos_spec_paper}
+\end{figure}
+
+\begin{itemize}
+  \item Do \red{not} expect $\Delta_{\text{QP}} \sim \Delta_{\text{Ex.}}$
+  \item Potential non-triviality of FS effects in $\Delta_{\text{QP/Ex.}}$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Physics of FS effects in 2D}
+\begin{minipage}[t]{0.5\textwidth}
+\vfill
+\begin{center}
+  \begin{tikzpicture}
+    \node<1> (img1) {\includegraphics[width=.9\linewidth]{figs/per_exc_fig/free.pdf}};
+    \node<2> (img2) {\includegraphics[width=.9\linewidth]{figs/per_exc_fig/free_box.pdf}};
+    \node<3> (img3) {\includegraphics[width=.9\linewidth]{figs/per_exc_fig/per_emp.pdf}};
+    \node<4-> (img4) {\includegraphics[width=.9\linewidth]{figs/per_exc_fig/per_full.pdf}};
+  \end{tikzpicture}
+\vfill
+\end{center}
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.5\textwidth}
+\begin{itemize}
+\item<1-> Want to model a free excitonic complex
+\item<2-> Supercell calculation (characteristic size $L$)
+\item<3-> Under periodic BCs
+\item<4-> Hence incurr an unphysical image-interaction
+\end{itemize}
+\end{minipage}%
+\vfill
+\begin{itemize}
+\item<5-> Need to remove $E_{\text{int}}$.
+\item<5-> Scaling arguments, or model calculations?
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Physics of FS effects in 2D (cont.)}
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{figs/coul_origin.png}
+  \caption{$r_*=0$ (Coulomb).}
+  \label{fig:sub1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{figs/keld_rs_50_origin.png}
+  \caption{$r_*=50$ a.u. (Keldysh).}
+  \label{fig:sub2}
+\end{subfigure}
+\caption{Field lines from point charges at $\rho=z=0$.}
+\label{fig:field_lines}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Physics of FS effects in 2D (cont.)}
+
+\begin{itemize}
+  \item With 2D screening (Keldysh interaction), charge-quadrupole
+  interaction\footnote{~~Note no dipole in inversion symmetric system!} leads to
+  expected scaling which is $\mathcal{O}(L^{-2})$.\footnote{~~(from taking sum
+  to be an integral - really only valid at large distances).}
+
+  \item Model calculation: study periodic excitons directly (lattice sums over
+  screened interaction). \textbf{In progress.}\footnote{~~At last check, the
+  data I had were best fit by a model $\Delta(a)=\Delta(\infty)+C a^{-P}$, with
+  exponent $p$ of 2.0073\ldots}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Physics of FS effects in 2D (cont.)}
+\begin{block}{$\Delta_{\text{QP}}$}
+  \begin{itemize}
+    \item Similar image effects, easier to manage.
+    \item Subtract single-particle $v_{\rm M}$ ($\mathcal{O}(L^{-1})$).
+    \item From regularized lattice sum over screened interaction ($\sim$ Ewald
+    sum).
+  \end{itemize}
+  \begin{equation}
+    \sum_{\bf R} W({\bf r}-{\bf R}) \rightarrow \overbrace{\sum_{\bf R} V({\bf
+    r}-{\bf R})}^{\green{Ewald}}
+    + \underbrace{\sum_{\bf R} \delta V({\bf r}-{\bf R})}_{\blue{{\it safe}}}.
+  \end{equation}
+  \begin{itemize}
+    \item ``\blue{{\it Safe}}'' is safe so long as screening becomes irrelevant
+    at long-range in real-space.
+  \end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}{Physics of FS effects in 2D (cont.)}
+  \begin{itemize}
+    \item FSE appear to scale as argued.
+    \item Big gaps (\red{$\epsilon$!}), but good agreement
+    w/ Gaufr\`{e}s \textit{et
+    al.}\footnote{~~This result is unpublished, so far, but was presented at GW
+    2018 by A. Loiseau. $\Delta_{\text{Ex}} = 1.95$ eV.}
+    \item Phonon renormalisation $\sim 0.17$ eV @ 300K.\footnote{~~Via
+    Bartomeu Monserrat, also as yet unpublished.}
+  \end{itemize}
+\begin{figure}[H]
+  \floatbox[{\capbeside\thisfloatsetup{capbesideposition={left, center},
+  capbesidewidth=0.4\textwidth}}]{figure}[\FBwidth]
+  {\caption{QMC energy gaps in phosphorene vs. system size.}\label{fig:phos}}
+  {\includegraphics[width=0.6\textwidth]{figs/phos.pdf}}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Physics of FS effects in 2D (cont.)}
+Another approach is to consider passivated (finite) clusters. Here FS effect
+is kinetic in origin (confinement).\footfullcite{Frank2018}
+\begin{itemize}
+  \item FS converge faster (QP gap $\mathcal{O}(L^{-2})$ by default), {\bf but}\ldots
+  \item State under study may not be relevant %not necessarily adiabatically connected to relevant
+  \footfullcite{Drummond2005}\ldots
+\end{itemize}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.6\linewidth]{figs/diamondoid.pdf}
+  \caption{Band charge densities in C$_{29}$H$_{36}$.}
+\label{fig:diamondoid}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Another QMC study of Phosphorene}
+Frank \textit{et al.} have also studied phosphorene. We're
+dissatisfied with their approach. Why?
+\begin{itemize}
+  \item Used cluster calculations to argue scaling in bulk calculations.
+  \item Calculated the \textit{wrong gap}:
+\begin{figure}[H]
+  \floatbox[{\capbeside\thisfloatsetup{capbesideposition={left, center},
+  capbesidewidth=0.5\textwidth}}]{figure}[\FBwidth]
+  {\caption{Excerpt from preprint.}\label{fig:frank}}
+  {\includegraphics[width=0.5\textwidth]{figs/frank.png}}
+\end{figure}
+  \item Our excitonic gap (2.2(2) eV) agrees with their ``quasiparticle'' gap
+  (2.4 eV) \smiley{}. \footnote{~~Guessed wrong scaling exponent (1/N) for QP gap, but
+  this isn't a QP gap! Just so happen to have calculated and taken TD limit for
+  an excitonic gap.  Assuming they've done the calculations correctly, a good
+  test of our result!}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Nodal errors in Phosphorene}
+We've tested the inclusion of backflow functions in a small Phosphorene test
+system.
+\begin{itemize}
+  \item $\Delta_{\text{QP}} $ lowered by $ 0.03(9)$ eV.
+  \item $\Delta_{\text{Ex.}} $ lowered by $ 0.04(5)$ eV.
+\end{itemize}
+\begin{figure}[H]
+  \floatbox[{\capbeside\thisfloatsetup{capbesideposition={left, center},
+  capbesidewidth=0.5\textwidth}}]{figure}[\FBwidth]
+  {\caption*{\red{Q} Why is backflow seemingly irrelevant here, when it
+  was critical in Si? When, generally, do nodal errors tend to matter?}\label{fig:puzzled}}
+  {\includegraphics[width=0.3\textwidth]{figs/thinking.png}}
+\end{figure}
+Backflow QMC has $\mathcal{O}({\rm N}^4_e)$ cost scaling. Further
+``computational exploration'' unlikely to provide answer.
+\end{frame}
+% }}*
+
+\section{Conclusion}
+
+% *{{ Conclusion
+\begin{frame}{Conclusion}
+\begin{itemize}
+  \item QMC methods offer a direct, real-space approach to the many-body problem.
+  \item They allow for accurate determination of energy gaps from
+  first-principles in one, two and three-dimensional systems.
+  \item They can be systematically extended, and treat various important pieces
+  of physics \green{exactly}. {\bf But}\ldots
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Conclusion (cont.) - QMC wishlist}
+  QMC might benefit from improvements in:
+  \begin{itemize}
+    \item Trial wave function technology: size-consistent determinant
+    selection? (further) compact parametrisation of correlations?
+    \item Algorithms: cubic scaling isn't bad, can we get prefactor
+    down? Can we cut more corners with energy differences?
+    \item FS treatment: extensive literature on ground states, can we do better
+    for excitations? Are $\rho$-based electrostatics methods better?
+  \end{itemize}
+\end{frame}
+
+% }}*
+
+% *{{ Thanks!
+\begin{frame}{Acknowledgements}
+
+\begin{minipage}[t]{0.45\textwidth}
+{\bf Lancaster:}
+\begin{itemize}
+  \item Neil Drummond
+  \item Marcin Szyniszewski
+\end{itemize}
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.45\textwidth}
+{\bf Japan (JAIST):}
+\begin{itemize}
+  \item Ryo Maezono
+  \item Genki Prayogo
+\end{itemize}
+\end{minipage}%
+\pause
+\vfill
+\begin{center}
+{\Large Thanks for your attention!}
+\end{center}
+\end{frame}
+% }}*
+
+% *{{ References
+\begin{frame}[t,allowframebreaks]{References}
+\printbibliography[]
+\end{frame}
+% }}*
+
+\appendix
+
+% *{{ Backups
+\begin{frame}[plain]{Backup I : The Keldysh interaction}
+Consider a planar sheet of (polarisable, 2D susc. $\kappa$) charge, at $z=0$, within a medium of
+dielectric constant $\epsilon$
+\begin{equation}
+  \rho({\bf r})=\rho_{2}(x,y)\delta(z),
+\end{equation}
+Electric displacement field associated with sheet is
+\begin{align}
+  {\bf D}(x,y,z) &= -\epsilon\nabla\phi(x,y,z)+{\bf P}_{\perp}(x,y)\delta(z),
+  \nonumber \\
+  &= -\epsilon\nabla\phi(x,y,z)+\kappa(\nabla\phi(x,y,0))\delta(z),
+\end{align}
+and Gauss' Law says $\nabla \cdot {\bf D}(x,y,z)=\rho(x,y,z)$.
+\end{frame}
+\begin{frame}[plain]{Backup I : The Keldysh interaction (cont.)}
+After FT and with some algebraic re-arrangement, leads to
+\begin{equation}
+  \phi({\bf q},z=0)=\dfrac{\rho_{2}({\bf q})}{q(2\epsilon+\kappa q)}.
+\end{equation}
+with ${\bf q}$ the 2D momentum. Looks like
+\begin{equation}
+V(r) = \text{expression},
+\end{equation}
+in real-space. The ``Keldysh'' interaction,~\footfullcite{Keldysh1979} but which was known to
+Rytova~\footfullcite{Rytova1965coulomb,Rytova1967screened} some time
+earlier\ldots
+\end{frame}
+
+\begin{frame}[plain]{Backup II: Variational Bounds}
+Excitonic promotion calculations: electron number fixed. Where states of
+definite crystal momentum can be chosen to populate the Slater determinant,
+trial state transforms (trivially) as 1D irrep. of group of translations (in a
+way that is basically as complicated as for 1D Bloch waves).
+
+\vfill
+
+Quasiparticle addition/removal: electron number varies. Key is that these are
+\textbf{not} bona fide excited states. QP energies formed from \textit{ground
+state} total energies of ${\rm N},{\rm N}\pm1$-electron systems.
+\end{frame}
+% }}*
+
+\end{document}
+% }}*

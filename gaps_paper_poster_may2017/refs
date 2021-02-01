@@ -1,0 +1,84 @@
+
+# Phosphorene biexciton binding
+@article{PhysRevB.93.115314,
+title = {Theoretical investigation of electron-hole complexes in anisotropic
+two-dimensional materials},
+author = {Chaves, A. and Mayers, M. Z. and Peeters, F. M. and Reichman, D. R.},
+journal = {Phys. Rev. B},
+volume = {93},
+issue = {11},
+pages = {115314},
+numpages = {5},
+year = {2016},
+month = {Mar},
+publisher = {American Physical Society},
+doi = {10.1103/PhysRevB.93.115314},
+url = {https://link.aps.org/doi/10.1103/PhysRevB.93.115314}
+}
+
+
+# alpha-quartz gw-bse
+@article{PhysRevLett.85.2613,
+title = {Excitons and Optical Properties of $\mathit{\ensuremath{\alpha}}$-Quartz},
+author = {Chang, Eric K. and Rohlfing, Michael and Louie, Steven G.},
+journal = {Phys. Rev. Lett.},
+volume = {85},
+issue = {12},
+pages = {2613--2616},
+numpages = {0},
+year = {2000},
+month = {Sep},
+publisher = {American Physical Society},
+doi = {10.1103/PhysRevLett.85.2613},
+url = {https://link.aps.org/doi/10.1103/PhysRevLett.85.2613}
+}
+
+# vibrational effects
+@article{PhysRevB.87.144302,
+  title = {Anharmonic vibrational properties in periodic systems: energy, electron-phonon coupling, and stress},
+  author = {Monserrat, Bartomeu and Drummond, N. D. and Needs, R. J.},
+  journal = {Phys. Rev. B},
+  volume = {87},
+  issue = {14},
+  pages = {144302},
+  numpages = {10},
+  year = {2013},
+  month = {Apr},
+  publisher = {American Physical Society},
+  doi = {10.1103/PhysRevB.87.144302},
+  url = {https://link.aps.org/doi/10.1103/PhysRevB.87.144302}
+}
+
+# finite size errors
+@article{PhysRevB.78.125106,
+  title = {Finite-size errors in continuum quantum Monte Carlo calculations},
+  author = {Drummond, N. D. and Needs, R. J. and Sorouri, A. and Foulkes, W. M. C.},
+  journal = {Phys. Rev. B},
+  volume = {78},
+  issue = {12},
+  pages = {125106},
+  numpages = {19},
+  year = {2008},
+  month = {Sep},
+  publisher = {American Physical Society},
+  doi = {10.1103/PhysRevB.78.125106},
+  url = {https://link.aps.org/doi/10.1103/PhysRevB.78.125106}
+}
+
+# neon "Exact NR"
+@article{PhysRevA.47.3649,
+  title = {Ground-state correlation energies for atomic ions with 3 to 18 electrons},
+  author = {Chakravorty, Subhas J. and Gwaltney, Steven R. and Davidson, Ernest R. and Parpia, Farid A. and p Fischer, Charlotte Froese},
+  journal = {Phys. Rev. A},
+  volume = {47},
+  issue = {5},
+  pages = {3649--3670},
+  numpages = {0},
+  year = {1993},
+  month = {May},
+  publisher = {American Physical Society},
+  doi = {10.1103/PhysRevA.47.3649},
+  url = {https://link.aps.org/doi/10.1103/PhysRevA.47.3649}
+}
+
+

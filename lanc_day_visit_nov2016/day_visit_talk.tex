@@ -1,0 +1,283 @@
+% *{{ preamble, non-content
+
+ % *{{ preamble
+\documentclass[12pt, pdf, hyperref={draft}, usenames, dvipsnames]{beamer}
+\usepackage{libertine, textcomp, amssymb, wasysym, color, ulem, verbatim}
+\usepackage{floatrow, subcaption}
+% hide controls
+\usenavigationsymbolstemplate{}
+\usepackage[T1]{fontenc}
+\synctex=1
+\setbeamertemplate{caption}[numbered]
+% }}*
+
+% *{{ item colouring and themes
+\usecolortheme{beaver}
+\setbeamertemplate{footline}[frame number]
+\definecolor{LancsRed}{HTML}{B5121B}
+\setbeamercolor{item}{fg=LancsRed}
+\setbeamercolor{title}{fg=LancsRed}
+\setbeamercolor{structure}{fg=LancsRed}
+\setbeamercolor{frametitle}{fg=LancsRed}
+\setbeamercolor{footnote mark}{fg=LancsRed}
+\setbeamercolor{footnote}{fg=LancsRed}
+\setbeamercolor{bibliography entry author}{fg=LancsRed}
+\setbeamercolor{bibliography entry title}{fg=black}
+\setbeamercolor{bibliography entry note}{fg=black}
+\setbeamercolor{section in toc}{fg=LancsRed}
+%\setbeamercolor{subsection in toc}{fg=gray}
+\newcommand{\gitem}[1]{\setbeamercolor{item}{fg=ForestGreen}\item[$\checkmark$] #1}
+\newcommand{\bitem}[1]{\setbeamercolor{item}{fg=LancsRed}\item[$\times$] #1}
+\newcommand{\nitem}[1]{\setbeamercolor{item}{fg=NavyBlue}\item[$-$] #1}
+% }}*
+
+% *{{ niceties
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\e}{\mathrm{e}}
+\newcommand{\ket}[1]{\lvert {#1} \rangle}
+\newcommand{\bra}[1]{\langle {#1} \rvert}
+\newcommand{\expt}[1]{\langle {#1} \rangle}
+\newcommand{\red}[1]{{\bf\color{LancsRed}{#1}}}
+\newcommand{\blue}[1]{{\bf\color{NavyBlue}{#1}}}
+\newcommand{\green}[1]{{\bf\color{ForestGreen}{#1}}}
+
+% }}*
+
+% *{{ title, subtitle, inst., date
+\title{First-Principles Modelling \\
+       of 2D Semiconductors}
+\subtitle{NOWNANO Day Visit}
+
+% authors and institutions
+%\author{\emph{Ryan J. Hunt}\inst{1},
+%        Neil D. Drummond\inst{1} \\
+%        and Vladimir I. Fal'ko\inst{2}}
+
+\author{Ryan Hunt}
+
+%\institute[]{
+%
+%  \inst{1}
+%  Department of Physics,\\
+%  Lancaster University
+%  \and
+%
+%  \inst{2}
+%  National Graphene Institute,\\
+%  University of Manchester}
+%
+% date
+\date{Friday 11$^{\text{th}}$ November}
+
+% }}*
+
+% *{{ bibliography setup
+\usepackage[backend=bibtex]{biblatex}
+\bibliography{dmc_bib}
+\renewcommand{\footnotesize}{\scriptsize}
+\AtEveryCitekey{\clearfield{title}
+                \clearfield{pagetotal}
+                \clearfield{pages}}
+
+% }}*
+
+% *{{ graphics on front page
+\titlegraphic{\vspace*{-2.5cm}\includegraphics[width=3cm]{figs/lan_logo.png}
+\hfill\includegraphics[width=3cm]{figs/nownano_logo.png}}
+
+% }}*
+
+% *{{ titlepage + toc
+
+% Section and subsections will appear in the presentation overview
+% and table of contents.
+
+\begin{document}
+
+\begin{frame}[plain]
+  \titlepage
+\end{frame}
+
+%\begin{frame}{Outline}
+%  \tableofcontents
+%\end{frame}
+
+% contents at ssubsection starts - comment to get rid
+%\AtBeginSection[]
+%{ \begin{frame}<beamer>{Outline}
+%    \tableofcontents[currentsection]
+%  \end{frame} }
+
+% }}*
+
+% }}*
+
+% *{{ What do I do? - Properties of Semiconductors
+\section{What do I do?}
+\begin{frame}{What do I do?}
+  \begin{itemize}
+    \item Broadly speaking, I use \green{advanced} \blue{electronic structure
+    methods} to gain insight into the electronic\footnote{or optoelectronic, or
+    structural, or all.} properties of materials.
+  \end{itemize}
+  \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{figs/bhbn.png}
+    \caption{Hexagonal Boron Nitride. If we didn't know about this material,
+    how would we go about \blue{determining} its properties?}
+    \label{fig:bhbn}
+  \end{figure}
+\end{frame}
+% }}*
+
+% *{{ Why do I do it? - Basic research / technological importance
+%                     - Semiconductors are challenging for first-principles...
+%                     - 2D is challenging for first-principles (vdw, screening)
+\section{Why?}
+\begin{frame}{Why do I do it?}
+\begin{minipage}{0.6\textwidth}
+  \begin{itemize}
+    \item We \textit{know} existing alternative approaches are \red{deficient}.
+    % DFT -> TM Oxides, qualitative failures.
+    % GW  -> would be good if didn't have obv DFT dependance.
+    % figure here - bandgap problem?
+    \vspace{0.8cm}
+    \item We \red{don't} always have the experimental capability to study a
+    certain material in a certain environment.
+    %\item Hopefully I don't have to tell you semiconductors are key to:
+    %  \begin{itemize}
+    %    \item Transistor technologies
+    %    \item Light harvesting technologies
+    %    \item Light emission technologies
+    %    \item Funding PhD students
+    %  \end{itemize}
+  \end{itemize}
+\end{minipage}%
+\hfill
+\begin{minipage}{0.4\textwidth}
+\centering
+  \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{figs/dft_gaps.pdf}
+    \caption{Bandgap problem of DFT \blue{(and $GW$..?)}\footnotemark.}
+    \label{fig:dft_gaps}
+  \end{figure}
+\end{minipage}
+\vspace{0.1cm}
+  \begin{itemize}
+    \item I believe that we should be capable of answering:  "Why does material
+    X have property Y". There is merit in \green{knowing}.
+  \end{itemize}
+  \footnotetext{van Schilfgaarde, {\it et al.}, PRL {\bf 96}, 2006.}
+\end{frame}
+
+% }}*
+
+% *{{ What are our methods? QMC!
+\section{How do I do what I do?}
+\begin{frame}{How do I do it?}
+  \begin{itemize}
+
+    \item \green{Quantum Monte Carlo} : we use random sampling
+    techniques to approximately solve the \red{full} many-electron
+    Schr\"{o}dinger equation.
+
+    \item \blue{Density Functional Theory} : despite its faults, DFT is still
+    an immensely successful theory. If you know \textit{nothing} about a
+    system, DFT is worth using.
+  \end{itemize}
+    \begin{figure}[H]
+      \centering
+      \includegraphics[width=0.8\linewidth]{figs/hpcs.jpg}
+      \caption{At any one time, I am running calculations on around 700+ HPC
+      cores, usually $\sim$ 350 here on \green{HEC} and more on the
+      \green{N8 HPC}.}
+      \label{fig:hpcs}
+    \end{figure}
+\end{frame}
+
+% }}*
+
+% *{{ What have I studied? binding cc's, gaps in solids
+\section{What kinds of things have I studied?}
+\begin{frame}{Examples of my research}
+  \begin{itemize}
+    \item Lots of time recently on calculating \blue{band gaps} for solids.
+  \end{itemize}
+\begin{minipage}{0.60\textwidth}
+  \begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{figs/si_bs.pdf}
+    \caption{Schematic bandstructure of Si.}
+    \label{fig:quartz}
+  \end{figure}
+\end{minipage}%
+\hfill
+\begin{minipage}{0.4\textwidth}
+  \begin{itemize}
+    \item Some results :
+  \vspace{0.2cm}
+  \end{itemize}
+\centering
+\begin{tabular}{ccc}  \hline
+Gap & DMC & Expt.\footnotemark \\ \hline
+$\Delta_{\Gamma \rightarrow \Gamma}$ & 3.57(4) eV & 3.4 eV \\
+$\Delta_{\Gamma \rightarrow X}$      & 1.24(4) eV & 1.2 eV \\
+$\Delta_{\Gamma \rightarrow L}$      & 2.39(4) eV & 2.0 eV
+\end{tabular}
+
+\end{minipage}
+\vspace{0.1cm}
+  \begin{itemize}
+    \item Also studied hexagonal and cubic BN, bulk $\alpha$-quartz, several
+    small molecules and dimers.
+  \end{itemize}
+
+\footnotetext{Taken from \texttt{ioffe.ru} database - all at 300K.}
+
+\end{frame}
+
+\begin{frame}{Examples cont.}
+  \begin{itemize}
+    \item Not-so-recently, charge carrier complex binding in coupled quantum
+    wells
+  \end{itemize}
+  \begin{minipage}{0.5\textwidth}
+  \centering
+  \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{figs/cqw_biexc.pdf}
+    \caption{Schematic of a biexciton in a CQW system.}
+    \label{fig:biexc}
+  \end{figure}
+  \end{minipage}%
+  \hfill
+  \begin{minipage}{0.5\textwidth}
+  \centering
+  \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{figs/pretty.pdf}
+    \caption{QMC Binding energy of this biexciton.}
+    \label{fig:be_binding}
+  \end{figure}
+  \end{minipage}
+
+\end{frame}
+% }}*
+
+% *{{ Another significantly important aspect of my experience
+\section{Summary}
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item I use highly accurate\footnote{Systematically
+    improvable, unbiased - but also very costly...} electronic structure
+    methods to (\green{hopefully}) obtain the right answers to \blue{important}
+    questions.
+    \item I am a member of the \textasciitilde 1 in 9 "moved to Lancaster club"
+    - and hence you can ask me general things if you are considering a move!
+  \end{itemize}
+\end{frame}
+% }}*
+
+\end{document}
+

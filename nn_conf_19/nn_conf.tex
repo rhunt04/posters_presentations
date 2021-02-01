@@ -1,0 +1,394 @@
+% *{{ Actual preamble
+% *{{ preamble
+\documentclass[10pt, pdf, hyperref={draft}, usenames, dvipsnames]{beamer}
+\usepackage{libertine,textcomp,amssymb,wasysym,color,ulem,verbatim,calc,tikz}
+\usepackage{floatrow,subcaption,appendixnumberbeamer,dcolumn,booktabs,multirow}
+% hide controls
+\usenavigationsymbolstemplate{}
+\usepackage[T1]{fontenc}
+\synctex=1
+\setbeamertemplate{caption}[numbered]
+
+\newcolumntype{d}[1]{D{.}{.}{#1}}
+\newcommand\mc[1]{\multicolumn{1}{c}{#1}}
+
+% }}*
+
+% *{{ item colouring and themes
+\usecolortheme{beaver}
+%\setbeamertemplate{footline}[frame number]
+\definecolor{LancsRed}{HTML}{B5121B}
+\setbeamercolor{item}{fg=LancsRed}
+\setbeamercolor{structure}{fg=black}
+\setbeamercolor{bibliography entry author}{fg=LancsRed}
+\setbeamercolor{bibliography entry title}{fg=black}
+\setbeamercolor{bibliography entry note}{fg=black}
+%\setbeamercolor{section in toc}{fg=LancsRed}
+%\setbeamercolor{title}{fg=LancsRed}
+%\setbeamercolor{frametitle}{fg=LancsRed}
+%\setbeamercolor{footnote mark}{fg=LancsRed}
+%\setbeamercolor{footnote}{fg=LancsRed}
+
+\setbeamercolor{subsection in toc}{fg=gray}
+
+% Page numbering:
+%\setbeamertemplate{footline}[frame number]{}
+%\setbeamercolor{footline}{fg=LancsRed}
+%\setbeamerfont{footline}{size=\small}
+
+\setbeamertemplate{frametitle}{\nointerlineskip
+    \begin{beamercolorbox}[wd=\paperwidth,ht=2.75ex,dp=1.375ex]{frametitle}
+        \hspace*{2ex}\insertframetitle \hfill
+        {\raisebox{1mm}{\textcolor{gray}{\small$\langle$\ \insertframenumber\
+        of
+        \inserttotalframenumber\ $\rangle$}}} \hspace*{1ex}%
+    \end{beamercolorbox}}
+
+\newcommand{\gitem}[1]{\setbeamercolor{item}{fg=ForestGreen}\item[$\checkmark$] #1}
+\newcommand{\bitem}[1]{\setbeamercolor{item}{fg=LancsRed}\item[$\times$] #1}
+\newcommand{\nitem}[1]{\setbeamercolor{item}{fg=NavyBlue}\item[$-$] #1}
+% }}*
+
+% *{{ margins
+\setbeamersize{text margin left=5mm, text margin right=5mm}
+% }}*
+
+% *{{ niceties
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\e}{\mathrm{e}}
+\newcommand{\ket}[1]{\lvert{#1}\rangle}
+\newcommand{\bra}[1]{\langle{#1}\rvert}
+\newcommand{\expt}[1]{\langle{#1}\rangle}
+\newcommand{\red}[1]{{\bf\color{LancsRed}{#1}}}
+\newcommand{\blue}[1]{{\bf\color{NavyBlue}{#1}}}
+\newcommand{\green}[1]{{\bf\color{ForestGreen}{#1}}}
+\newcommand{\orange}[1]{{\bf\color{BurntOrange}{#1}}}
+\newcommand{\mred}[1]{{\color{LancsRed}{#1}}}
+\newcommand{\mblue}[1]{{\color{NavyBlue}{#1}}}
+\newcommand{\mgreen}[1]{{\color{ForestGreen}{#1}}}
+\newcommand{\morange}[1]{{\color{BurntOrange}{#1}}}
+\newcommand{\kfr}{{\bf k}_{\rm f}}
+\newcommand{\kto}{{\bf k}_{\rm t}}
+\let\OLDitemize\itemize
+\renewcommand\itemize{\OLDitemize\addtolength{\itemsep}{5pt}}
+% }}*
+
+% *{{ title, subtitle, inst., date
+\title{{\LARGE Excitons in two-dimensional materials from first-principles (by
+Quantum Monte Carlo!)}}
+%\subtitle{Ryan Hunt \\ CMT Seminar \\ 20$^{\text{th}}$ June}
+
+% authors and institutions
+\author{\large Ryan J. Hunt }% \\ 2D Conference 2019 \\ 2$^{\text{nd}}$ July }
+
+\institute[]{\normalsize
+Department of Physics \\
+Lancaster University}
+
+%\date{today}
+\date{}
+
+% }}*
+
+% *{{ bibliography setup
+\usepackage[backend=biber, style=phys]{biblatex}
+\bibliography{refs}
+\renewcommand{\footnotesize}{\scriptsize}
+\AtEveryCitekey{\clearfield{title}
+                \clearfield{pagetotal}
+                \clearfield{pages}
+                \clearfield{doi}}
+\renewcommand*{\bibfont}{\footnotesize}
+
+% }}*
+
+% *{{ graphics on front page
+\titlegraphic{\includegraphics[width=4cm]{figs/lan_logo.png}
+\hfill\includegraphics[width=4cm]{figs/nownano_logo.png}}
+
+% }}*
+
+% *{{ titlepage + toc
+
+% Section and subsections will appear in the presentation overview
+% and table of contents.
+
+\begin{document}
+
+\begin{frame}[plain]
+  \titlepage
+\end{frame}
+
+%\begin{frame}{Outline}
+%  \tableofcontents
+%\end{frame}
+
+% contents at ssubsection starts - comment to get rid
+% \AtBeginSection[]
+% {\begin{frame}<beamer>{Outline}
+%  \tableofcontents[currentsection]
+% \end{frame}}
+
+% }}*
+
+% }}* End Preamble
+
+\begin{frame}{Excitons}
+
+\begin{itemize}
+
+  \item Objects are translucent when some of the light incident on them is
+  \textit{absorbed}.
+
+  \item Absorption is mediated by individual absorbing units (\blue{$e^{-}$}).
+
+\end{itemize}
+
+\begin{minipage}[t]{0.3\textwidth}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{figs/cv_gaps.pdf}
+  %\caption{}
+%\label{fig:}
+\end{figure}
+
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.65\textwidth}
+
+\begin{itemize}
+\vspace{0.5cm}
+  \item In crystals, \blue{$e^{-}$} live in discrete \textit{energy bands}.  In
+  semiconductors, all of the \blue{$e^{-}$} live under a \textit{band
+  gap}.\footnotemark
+\vspace{0.5cm}
+  \item The onset of optical absorption is defined by the position of
+  lowest-lying \textit{exciton levels}.
+\vspace{0.5cm}
+  \item Band theory + independent \blue{$e^{-}$} approx. $\implies$ cannot describe
+  excitonic effects.
+
+\end{itemize}
+
+
+\end{minipage}%
+\footnotetext{~~Or $\epsilon_{\text{F}}$ lies in a \textit{band gap}.}
+
+\end{frame}
+
+\begin{frame}{Energy Gaps \& Exciton Binding}
+
+\begin{itemize}
+  \item How do we define the exciton binding energy in a way that allows for
+  first-principles calculation?
+  \item For excitations between ${\kfr}$ and ${\kto}$,
+\end{itemize}
+\begin{align}
+  \Delta_{\text{QP}}(\kfr,\kto) &= \varepsilon_{\text{CBM}}(\kto) -
+  \varepsilon_{\text{VBM}}(\kfr), \nonumber \\
+   &=E_{{\rm N}+1}(\kto)+E_{{\rm N}-1}(\kfr)-
+  E_{\rm N}(\kto)-E_{\rm N}(\kfr), \nonumber \\
+  \Delta_{\text{Ex}}(\kfr,\kto) &= E^{+}_{\rm N}(\kfr, \kto) - E_{\rm N},
+\end{align}
+
+Most challenging aspects?
+
+\begin{enumerate}
+  \item Can only calculate these in finite \textit{supercells}.
+  \item $E^{+}_{\rm N}$ is a genuine many-body excited state energy.
+\end{enumerate}
+
+\end{frame}
+
+\begin{frame}{Step back: Mott-Wannier Models}
+
+\textbf{Q:} What could we do instead of first-principles modelling?
+
+\begin{itemize}
+  \item Invoke effective mass approximation, try to cook up realistic
+  electron-hole interaction potentials
+  $V$.\footfullcite{Rytova1965,Rytova1967,Keldysh1979}
+\end{itemize}
+
+Then, solve
+\begin{equation}
+  \left[ -\sum^{n}_{\alpha=1}\dfrac{\hbar^2}{2m_{\alpha}}\nabla^{2}_{\alpha}  +
+  \sum_{\alpha<\beta} \dfrac{q_i q_j}{4\pi\epsilon_0}V({\bf r}_{\alpha},{\bf
+  r}_{\beta})
+  \right]\Psi({\bf R}) = E\Psi({\bf R}),\ {\bf R} \equiv ({\bf r}_1,\ldots,{\bf
+  r}_n)\label{eq:fpse}
+\end{equation}
+
+\begin{itemize}
+  \item Neglecting many-particle correlation effects, relying on parameters,
+  and \textit{failing} in physically reasonable cases.\footnote{~~Frenkel
+  excitons, for example, are perfectly reasonable objects.}
+  \item Have done this numerous times for ``reasonable''
+  cases.\footfullcite{biex_paper,hbl_paper,tri_paper,ring_paper}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Quantum Monte Carlo methods (abridged)\footfullcite{Foulkes2001}}
+
+\begin{itemize}
+
+  \item  In Variational Monte Carlo (VMC), we \textit{guess} a many particle
+  wave function, and improve our guess by monitoring observables (whilst
+  tweaking parameters $\{\alpha\}$!).
+  \begin{equation}
+    \Psi({\bf R}) = \exp{[J({\bf R}; \{\alpha\})]} \times D({\bf R}) =
+    \Psi({\bf R},0).
+  \end{equation}
+
+  \item In Diffusion Monte Carlo (DMC), we take our trial wave function and
+  propagate it through imaginary time. Removing excited components, and
+  allowing us to sample an estimate of the true energy.\footnote{~~With various
+  caveats.}
+  \begin{align}
+    \Psi_{\text{DMC}}({\bf R},\tau) &= \exp{[-\tau(E_{\rm
+    T}-\mathcal{H})]}\Psi({\bf R},0) \\ &~~~\vdots \nonumber \\
+    \Psi_{\text{Exact}} &\sim \lim_{\tau \rightarrow \infty}
+    \Psi_{\text{DMC}}({\bf R},\tau)
+  \end{align}
+
+  \item \red{People don't generally do this because it requires the use of
+  supercomputers.}
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Phosphorene}
+A direct gap 2D semiconductor, with large exciton binding
+energy.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.6\linewidth]{figs/phos_spec_paper.jpg}
+  \caption{PL measurements of Phosphorene $n$-layers.\footnotemark}
+\label{fig:phos_spec_paper}
+\end{figure}
+\footnotetext{\fullcite{yang2015}}
+
+\begin{itemize}
+  \item Can we extract the $n=1$ exciton binding energy w/ QMC?
+  \item What are the issues that affect such QMC calculations?
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Phosphorene (cont.)}
+
+\begin{minipage}[t]{0.45\textwidth}
+
+Yes, expt. on suspended monolayers give 0.9(1) eV.\footnotemark\\
+
+We must pay attention to:
+\vspace{0.3cm}
+\begin{itemize}
+  \item Finite-size errors.
+  \item Vibrational effects.
+  \item Computational efficiency.
+\end{itemize}
+
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.5\textwidth}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{figs/phos.pdf}
+  %\caption{Name}
+%\label{fig:name}
+\end{figure}
+
+\end{minipage}%
+\footnotetext{\fullcite{wang2015,carvalho2016}}
+
+
+\begin{itemize}
+  \item Nuclear vibrations renormalise the QP gap by
+  $\mathcal{O}(-0.09\ \text{eV})$ @ 0K.\footnote{~~B.
+  Monserrat, private communication (2018). Correction roughly doubles at room temperature.}
+
+  \item We have tested the relaxation of a serious technical assumption in DMC,
+  finding that it \textit{does not} affect our results.\footfullcite{Hunt2018}
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Conclusions: Outlook for QMC}
+  \begin{itemize}
+    \item It is possible to model excitons (and band gaps!) in 2D materials
+    using QMC. Results are in \green{agreement with experiment}, \textit{where
+    reasonable}.
+
+    \item QMC calculations are still expensive, but perhaps to a \blue{similar degree
+    to alternatives} (e.g.~fully converged $GW$-BSE).
+
+    \item Extraction of more relevant (?) quantities (oscillator strengths,
+    lifetimes, full absorption spectra) in solids still a \red{pipe dream}
+    for QMC.
+
+    \item Extraction of the same quantities for more \textit{realistic} cases
+    (defects, finite carrier concentration, under external fields) is
+    \green{perfectly possible}.\footnote{~~Though maybe in a couple of
+    centuries.}
+
+  \end{itemize}
+\end{frame}
+
+% *{{ End
+
+\begin{frame}{Acknowledgements}
+
+\begin{minipage}[t]{0.45\textwidth}
+
+Lancaster:
+\begin{itemize}
+  \item N. D. Drummond
+  \item M. Szyniszewski
+  \item D. M. Thomas
+\end{itemize}
+\vspace{0.5cm}
+\textit{JAIST} (Japan):
+\begin{itemize}
+  \item G. I. Prayogo
+  \item R. Maezono
+\end{itemize}
+
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.45\textwidth}
+
+Manchester:
+\begin{itemize}
+  \item D. A. Ruiz-Tijerina
+  \item M. Danovich
+  \item V. I. Fal'ko
+\end{itemize}
+
+\vspace{0.5cm}
+Cambridge:
+\begin{itemize}
+  \item B. Monserrat
+\end{itemize}
+\vspace{0.5cm}
+
+\ldots and all the people in my CDT year group.
+
+\end{minipage}%
+\vfill
+\centering\par\noindent\rule{0.7\textwidth}{0.8pt}
+
+\vfill
+\begin{center}
+  {\Large Thanks for listening!}
+\end{center}
+\vfill
+\end{frame}
+
+\end{document}
+% }}*

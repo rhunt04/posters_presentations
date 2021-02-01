@@ -1,0 +1,207 @@
+\documentclass[12pt, a4paper]{article}
+
+\usepackage[top=20mm, bottom=20mm, left=20mm, right=20mm, includefoot]{geometry}
+\usepackage{amsmath, amssymb, enumitem, color, framed}
+\usepackage[obeyspaces,spaces]{url}
+
+\synctex=1
+
+% fonts setup
+\usepackage{cmbright}
+\usepackage[T1]{fontenc}
+\usepackage[mathscr]{euscript}
+
+% general useful objects
+%\pagenumbering{gobble}
+\newcommand{\ket}[1]{\lvert{#1}\rangle}
+\newcommand{\bra}[1]{\langle{#1}\rvert}
+\newcommand{\expt}[1]{\langle{#1}\rangle}
+\newcommand{\e}{\mathrm{e}}
+\newcommand{\dd}{\mathrm{d}}
+
+\title{Excited States by QMC}
+\author{TTI 2017 Worksheet \\ Ryan Hunt \\ Lancaster University}
+
+\begin{document}
+\maketitle
+
+\section{{The first ionization potential of O$_2$}}
+In this exercise, we will calculate the first ionization potential of the
+oxygen molecule. The ionization potential is defined as
+
+\begin{equation}
+  \text{IP} = E^{0}_{N-1} - E^{0}_{N},
+\end{equation}
+
+\noindent where $E^{0}_{N}$ denotes the ground state energy of the $N$-electron
+molecule. We will perform this calculation with the ``G2'' geometry, a Gaussian
+basis set, and we will not use pseudopotentials. We'll use VMC for speed, but
+the extension to DMC is not difficult (if you are interested, time steps of
+0.001 and 0.004 a.u.\ are reasonable). In this case, we should be able to
+achieve reasonable agreement with experimental results
+(\textcolor{red}{why?}).\footnote{See, for example, the data listed at
+\url{http://webbook.nist.gov/cgi/cbook.cgi?ID=C7782447&Mask=20}.}
+
+\subsection{Problem Setup}\label{sub:problem_setup}
+
+\begin{enumerate}
+
+  \item Copy the contents of \url{~/CASINO/examples/molecule/G2_SET/o2/} to a
+  directory you wish to work from.\footnote{If \texttt{CASINO} is not installed
+  in your home directory, find it, and copy the same files.}
+
+  \item Look in the input file. It is relatively simple, and (if everything has
+  worked!) specifies a VMC calculation. Something worth noting is that
+  \texttt{neu}=9 and \texttt{ned}=7 - in its ground state, O$_2$ hosts a
+  spin-triplet configuration ($^{3}\Sigma^{-}_{g}$).
+
+  \item Make two directories: \texttt{gs} and \texttt{rem}, copy all of the
+  files into each of them. The \texttt{gs} calculation is now ready, and we
+  need to set up the excited state. Enter the \texttt{rem} directory and open
+  the input file. We need to remove a single electron from this configuration.
+
+  \item The correct electron to remove (which leads to the lowest IP) is one of
+  the spin-up electrons. Edit the file so that \texttt{neu}=8. [EXTRA:\ If you
+  feel like it, try to see what happens in the rest of the exercise when
+  removing a spin-down electron. You may or may not be able to notice the
+  difference, \textcolor{red}{why?}]
+
+\end{enumerate}
+
+\subsection{VMC Calculations}\label{sub:vmc_calculations}
+
+\begin{enumerate}
+
+  \item If everything has gone well, you will now have two VMC calculations
+  ready to execute - one to calculate $E^{VMC}_{N}$ and one to calculate
+  $E^{VMC}_{N-1}$.
+
+  \item Run each calculation with \texttt{runqmc}. [EXTRA:\ If you want, before
+  you do this, you can try to optimise the Jastrow factor (edit
+  \texttt{correlation.data} terms, change \texttt{runtype} to \texttt{vmc\_opt}
+  in the input file, and so on).]
+
+  \item Is the number of VMC steps in the input file limiting you? Try
+  achieving a better accuracy by adjusting the number of VMC steps. If you are
+  struggling to think of a good number, think about statistics. The error bar
+  should scale like $1/\sqrt{N_{\text{steps}}}$ - you have one result with a
+  small number of steps.
+
+\end{enumerate}
+
+\subsection{Checking \& Thinking}\label{sub:checking_&_thinking}
+
+\begin{enumerate}
+
+  \item What is your final result for the IP?\ How does it compare to
+  experiment?
+
+  \item What major aspect of this example has been missed by our approach? Why
+  might this make comparison to \textit{some} of the experiments difficult?
+
+  \item If an experimentalist friend (they exist) approaches you, and asks if
+  you can give them an accurate ionization potential accurately for their
+  molecular system, what should you ask them about their experiment before you
+  say ``yes'' or ``no''?
+
+\end{enumerate}
+
+
+\section{$\bf\Gamma \boldsymbol\rightarrow \Gamma$ energy gap in Silicon}
+
+Perhaps a slightly more interesting case for QMC is that of a crystalline
+solid. In this example, we'll consider a $2\times 2\times 2$ supercell of
+Silicon, and try to calculate the energy gap from $\Gamma \rightarrow \Gamma$.
+In particular, we will calculate the \textit{excitonic} energy gap
+
+\begin{equation}
+  \Delta_{\text{Exc}} = E^{\Gamma \rightarrow \Gamma}_{N} - E^{0}_{N}
+\end{equation}
+
+\noindent
+where, again, $E^{0}_{N}$ is the ground state energy of the $N$ electron
+system, but this time $E^{\Gamma \rightarrow \Gamma}_{N}$ is the energy of the
+system which has had an electron promoted from the valence band at $\Gamma$ to
+the conduction band at $\Gamma$.
+
+\subsection{Problem Setup}\label{sub:problem_setup_2}
+
+\begin{enumerate}
+  \item Copy the contents of \textit{the silicon folder} to
+  a directory you wish to work from.
+
+  \item Look in the input file. Again, a relatively simple case, this
+  calculation specifies a VMC calculation. Type \texttt{runqmc} and read the
+  out file - try to figure out what is going on.
+
+  \item Make two directories, one for the ground state calculation and one for
+  the excited state ($\Gamma \rightarrow \Gamma$ promotion) calculation. Give
+  them helpful names!
+
+  \item Copy the \texttt{CASINO} files into the directory you created to hold
+  the ground state calculation.
+
+  \item Enter that directory and \texttt{runqmc}. Read the output file, where
+  are the electrons? Where are they \textit{not}?
+
+\end{enumerate}
+
+\subsection{VMC calculations}\label{sub:vmc_calculations_2}
+
+\begin{enumerate}
+  \item Now you should know that the \texttt{bwfn.data} file contains orbitals
+  for empty states. These are useful - we will want to promote electrons into
+  these!
+
+  \item Check the ground state calculation output file - we need to know which
+  {\bf k}-point is the $\Gamma$ point - and which band number is the valence band
+  maximum (\& conduction band minimum). Take note of these.
+
+  \item Read section 7.4.5 of the \texttt{CASINO} manual, at
+  \url{~/CASINO/manual/}. This will be important for the next stage!
+
+  \item Copy the \texttt{bwfn.x} files into the directory holding the files for
+  the promotion calculation, and move into that directory. We will need to take
+  the advice of the manual - and use the MDET block to specify an excitation.
+
+  \item Open the \texttt{correlation.data} file. We need to specify an
+  excitation from the VBM at $\Gamma$ to the CBM at $\Gamma$. Try to do this
+  \textbf{yourself} - using the band and {\bf k}-point numbers from
+  earlier, and the guidance in the manual.\footnote{If you are stuck, ask for
+  help!}
+
+  \item Run the promotion calculation, and check the out file. Are the
+  occupancies what you expect? They \textit{might not be}. \textcolor{red}{Why?}
+
+  \item Try deleting the \texttt{bwfn.data.bin} file you copied in earlier.
+  Re-run the calculation. Check the occupancies now. What has changed, and why?
+
+  \item[{\bf FYI:}] \texttt{CASINO} won't always be like this, we want to make
+  it easier to do these calculations. However, this is the easiest way to get
+  an understanding of what happens (a) in the code and (b) to the wave
+  function upon the creation of an electronic excitation.
+\end{enumerate}
+
+\subsection{Checking \& Thinking}\label{sub:checking_&_thinking_2}
+
+\begin{enumerate}
+  \item What is your final result for the $\Gamma \rightarrow \Gamma$ excitonic
+  gap in silicon? How does this compare to literature values?
+
+  \item Can you increase the number of VMC steps, to lower your VMC error bar?
+  If so, try obtaining a more accurate VMC result.
+
+  \item In the O$_2$ case, we missed something that could have been important -
+  vibrational effects. We've missed those here, but we also have another
+  \textbf{major} source of error. What is it? How could we try to address it?
+
+  \item If you were to do the same calculation for another solid, or at
+  another point in {\bf k}-space, what questions would you have to ask yourself
+  before you start your project? [Hints: think about {\bf k}-point grids, the
+  number of electrons in the system, how much computer time you expect to be
+  able to sacrifice\ldots]
+\end{enumerate}
+
+
+
+\end{document}

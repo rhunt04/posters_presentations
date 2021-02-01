@@ -1,0 +1,541 @@
+% *{{ preamble
+\documentclass[12pt, pdf, hyperref={draft}, usenames, dvipsnames]{beamer}
+\usepackage{libertine, textcomp, amssymb, wasysym, color, ulem, verbatim}
+\usepackage{floatrow, subcaption}
+\usepackage[makeroom]{cancel}
+\usepackage{mathtools}
+% hide controls
+\usenavigationsymbolstemplate{}
+\usepackage[T1]{fontenc}
+\synctex=1
+\setbeamertemplate{caption}[numbered]
+% }}*
+
+% *{{ item colouring and themes
+\usecolortheme{beaver}
+\setbeamertemplate{footline}[frame number]
+\definecolor{LancsRed}{HTML}{B5121B}
+\setbeamercolor{item}{fg=LancsRed}
+\setbeamercolor{title}{fg=LancsRed}
+\setbeamercolor{structure}{fg=LancsRed}
+\setbeamercolor{frametitle}{fg=LancsRed}
+\setbeamercolor{footnote mark}{fg=LancsRed}
+\setbeamercolor{footnote}{fg=LancsRed}
+\setbeamercolor{bibliography entry author}{fg=LancsRed}
+\setbeamercolor{bibliography entry title}{fg=black}
+\setbeamercolor{bibliography entry note}{fg=black}
+\setbeamercolor{section in toc}{fg=LancsRed}
+%\setbeamercolor{subsection in toc}{fg=gray}
+\newcommand{\gitem}[1]{\setbeamercolor{item}{fg=ForestGreen}\item[$\checkmark$] #1}
+\newcommand{\bitem}[1]{\setbeamercolor{item}{fg=LancsRed}\item[$\times$] #1}
+\newcommand{\nitem}[1]{\setbeamercolor{item}{fg=NavyBlue}\item[$-$] #1}
+% }}*
+
+% *{{ niceties
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\e}{\mathrm{e}}
+\newcommand{\ket}[1]{\lvert{#1}\rangle}
+\newcommand{\bra}[1]{\langle{#1}\rvert}
+\newcommand{\expt}[1]{\langle{#1}\rangle}
+\newcommand{\red}[1]{{\bf\color{LancsRed}{#1}}}
+\newcommand{\blue}[1]{{\bf\color{NavyBlue}{#1}}}
+\newcommand{\green}[1]{{\bf\color{ForestGreen}{#1}}}
+
+% }}*
+
+% *{{ title, subtitle, inst., date
+\title{Modelling Charge Complexes in \\
+       2D Materials \& Their Heterostructures}
+\subtitle{Graphene NOWNANO CDT Monthly Seminar}
+
+% authors and institutions
+%\author{\emph{Ryan J. Hunt}\inst{1},
+%        Neil D. Drummond\inst{1} \\
+%        and Vladimir I. Fal'ko\inst{2}}
+
+\author{Ryan Hunt \\
+27$^{\text{th}}$ October, 2017}
+
+%\institute[]{
+%
+%  \inst{1}
+%  Department of Physics,\\
+%  Lancaster University
+%  \and
+%
+%  \inst{2}
+%  National Graphene Institute,\\
+%  University of Manchester}
+%
+\date{}
+
+% }}*
+
+% *{{ bibliography setup
+\usepackage[backend=bibtex]{biblatex}
+\bibliography{refs}
+\renewcommand{\footnotesize}{\scriptsize}
+\AtEveryCitekey{\clearfield{title}
+                \clearfield{pagetotal}
+                \clearfield{pages}}
+
+% }}*
+
+% *{{ graphics on front page
+\titlegraphic{\vspace*{-1.5cm}\includegraphics[width=3cm]{figs/lan_logo.png}
+\hfill\includegraphics[width=3cm]{figs/nownano_logo.png}}
+
+% }}*
+
+% *{{ titlepage + toc
+
+% Section and subsections will appear in the presentation overview
+% and table of contents.
+
+\begin{document}
+
+\begin{frame}[plain]
+  \titlepage\end{frame}
+
+%\begin{frame}{Outline}
+%  \tableofcontents
+%\end{frame}
+
+% contents at ssubsection starts - comment to get rid
+\AtBeginSection[]
+{\begin{frame}<beamer>{Outline}
+  \tableofcontents[currentsection]
+  \end{frame}}
+
+% }}*
+
+% Setup: what's the question? EM in 2D (logarithms!)
+% Monolayers: Keldysh, results, big things, word on metallics
+% Bilayers (and beyond...?): potentials, approximations, exactitudes,
+% experiments, decay rates?
+
+% *{{ What is my question?
+
+% define charge complexes, motivate their study, talk about why 2D materials
+% are interesting.
+
+\begin{frame}{What are charge complexes, why study them?}
+
+\begin{itemize}
+  \item Charge-carrier complexes are \blue{bound states} of two or more charges in a host
+  material.
+  \item Common example is an exciton.
+
+  \begin{figure}[H]
+    \floatbox[{\capbeside\thisfloatsetup{capbesideposition={left, center},
+    capbesidewidth=0.5\textwidth}}]{figure}[\FBwidth]
+    {\caption{Schematic view of an exciton - a bound state comprised of one
+    electron and one hole.}\label{fig:exc_schematic}}
+    {\includegraphics[width=0.5\textwidth]{figs/exciton_setup.pdf}}
+  \end{figure}
+
+  \item At low enough temperatures, charge complexes {\bf dominate} the optical
+  response of semiconductors.
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Effective mass approximation}
+
+  \begin{itemize}
+
+    \item In conventional semiconductors,\footnote{Take III-Vs as an explicit
+    example.} the binding of excitons may be described in the \blue{effective mass
+    approximation}.
+
+    \item The electronic band structures of these materials serve
+    to supply effective masses for electrons and holes.
+
+    \item We then solve Schr\"{o}dinger equations analogous to those for the
+    hydrogen atom:
+
+    \begin{equation}
+      \left[-\sum_i\dfrac{\hbar^2}{2m_i}\nabla^2_i + \sum_{i<j}V({\bf
+      r}_{ij})\right]\Psi(\{{\bf r}_i\}) = E\Psi(\{{\bf r}_i\})
+    \end{equation}
+
+  \end{itemize}
+\end{frame}
+
+% }}* end my question
+
+% *{{ 2D EM, our monolayer model, QMC
+
+\begin{frame}{Electromagnetism in Flatland}
+\begin{itemize}
+  \item If we lived in flatland (bona fide 2D space), electromagnetism would
+  be a \blue{very different beast}.
+  \item Poisson's equation would look the same, however, it's (two-dimensional)
+  solution would predict a ``logarithmic Coulomb potential'' between pairs of
+  point charges.\footnote{\
+  Explanation for technical people: look at the inverse Fourier transform of
+  the Green's function $G({k})=1/k^2$ in 2D and 3D. By power counting you can
+  see that this is the case. EM in 1D is ever stranger.}
+\end{itemize}
+\begin{equation}
+  \nabla^2 \phi({\bf r}) = -\dfrac{\rho({\bf r})}{\epsilon_0}.
+\end{equation}
+\begin{equation}
+  V_q({\bf r}) = -q\ln{\lvert {\bf r} \rvert}.
+\end{equation}
+\begin{itemize}
+  \item But we don't live in flatland, so we \red{don't get this}
+  \frownie\
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Reality: 3D space, and electrostatic screening}
+  \ldots or do we? In any realistic model, and in every experiment ever
+  done on 2D materials, one other factor is very important: \green{screening}.
+
+\begin{itemize}
+  \item Electrostatic screening is the suppression in electric field strength
+  due to the presence of mobile charges.
+  \item Screening is lessened for 2D materials that are taken from their parent
+  compound - interactions between charges are stronger.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{The Keldysh Interaction}
+\begin{itemize}
+  \item Keldysh\footfullcite{Keldysh1979} showed that the effective interaction between charges in
+  a 2D material has a special form
+  \begin{equation}
+    V_{\text{K}}({\bf r}) = \dfrac{q_1q_2}{8\epsilon_r \epsilon_0 r_*}
+    \left[ H_0\left(\frac{r}{r_*}\right) - Y_0\left(\frac{r}{r_*}\right)
+    \right],
+  \end{equation}
+  with $r_*$ a material parameter (usually \red{inferred} from \textit{ab initio}
+  DFT or $GW$ calculations of $\epsilon({\bf q},\omega)$).
+  \begin{figure}[H]
+    \floatbox[{\capbeside\thisfloatsetup{capbesideposition={right, center},
+    capbesidewidth=0.5\textwidth}}]{figure}[\FBwidth]
+    {\caption{The Keldysh interaction. Notice we have recovered a
+    log-dependence at short-range\ldots}\label{fig:keldysh}}
+    {\includegraphics[width=0.5\textwidth]{figs/full_int.eps}}
+  \end{figure}
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Complexes in Monolayers}
+\begin{itemize}
+  \item It turns out that the Keldysh interaction permits numerous bound states
+  to exist, for typical $r_*$ values ($\mathcal{O}$(50\ \AA), vacuum).
+\end{itemize}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\linewidth]{figs/various_complexes.pdf}
+  \caption{A few of the charge carrier complexes which can exist in 2D
+  semiconductors.}
+\label{fig:various_complexes}
+\end{figure}
+\end{frame}
+
+
+\begin{frame}{Our Model}{\& some of its limitations}
+\begin{itemize}
+  \item Taking monolayers as a goal, for now, we seek to solve
+  \begin{equation}
+      \left[-\sum_i\dfrac{\hbar^2}{2m_i}\nabla^2_i + \sum_{i<j}V_{\text{K}}({\bf
+      r}_{ij})\right]\Psi(\{{\bf r}_i\}) = E\Psi(\{{\bf r}_i\}),
+  \end{equation}
+  for various complexes. We then compare total energies $E$ in order to
+  evaluate binding energies (experimentally relevant).
+
+  \item We ignore exchange effects, but can add
+  them back in as a \blue{perturbative correction} (requires pair distribution
+  functions, and unknown parameters\ldots).
+
+  \item We are assuming that both the E.M.A. holds, and that the Keldysh
+  interaction is a good approximation for real materials.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Solving the few-body problem:\\ Quantum Monte Carlo}
+\begin{itemize}
+  \item We solve our few-body effective mass Schr\"{o}dinger equations by using
+  the variational and diffusion quantum Monte Carlo methods (VMC, DMC).
+  \item In VMC, estimates of high-dimensional integrals are formed from
+  (cleverly weighted) random sampling. \red{The results are as good as the trial
+  wave function}.
+\end{itemize}
+\begin{align}
+  E\left[\ket{\Psi}\right] &= \dfrac{\bra{\Psi} \mathcal{\hat H}
+  \ket{\Psi}}{\bra{\Psi}\Psi \rangle} = \displaystyle\int \dd{\bf R} \Pi({\bf
+  R}) E_{\text{L}}({\bf R}) \nonumber \\
+  \Pi({\bf R}) &= \dfrac{\lvert\Psi({\bf R}) \rvert^2}{\int\dd{\bf R}\lvert
+  \Psi({\bf R})\rvert^2},\ E_{\text{L}} = \dfrac{\mathcal{\hat H} \Psi({\bf R})}{\Psi({\bf R})}
+\end{align}
+\end{frame}
+
+
+\begin{frame}{Quantum Monte Carlo II - VMC}
+\begin{itemize}
+  \item VMC is usually only ever done as a prelude to DMC\@.
+  \item In these models, we start with \blue{educated guesses} at the trial wave
+  function which are of \blue{Jastrow} form
+  \begin{equation}
+    \Psi_{\text{T}}({\bf R}) = \exp{\left[ \mathcal{J}_{\{\alpha\}}({\bf R})\right]}
+  \end{equation}
+  where $\{\alpha\}$ are a set of optimisable parameters.
+  \item In practice, we vary the $\{\alpha\}$ such that some property of the
+  wave function is \blue{optimal} (minimise E, variance of E, or MAD of E).
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Quantum Monte Carlo III - DMC}
+\begin{itemize}
+  \item In DMC, a trial function is propagated in imaginary
+  time,\footnote{Details not important - but we do this by interpreting the
+  problem as a \textit{statistical} one.} such that
+  any excited state components it may contain are removed. The results are
+  \green{independent of the trial function (in our cases), and offer improvement over
+  VMC results.}
+  \item We exploit (with $t=i\tau$)
+  \begin{equation}
+    \lim_{\tau \rightarrow \infty} \exp{\left[ -\tau \mathcal{\hat H} \right]}
+    \ket{\Psi_{\text{T}}} \sim \ket{\Psi_{\text{GS}}}
+  \end{equation}
+
+  \item DMC is \green{exact for nodeless wave functions}.
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Fairness: How else might one do this?}
+Other approaches for solving these kinds of problems exist. I won't
+talk about these, but for completeness I will mention them.
+\begin{itemize}
+  \item $GW$--$BSE$: Solve the Bethe-Salpeter equation for the spectral
+  function of a material including two-body effects.
+  \item First-principles QMC:\@ Solve the many-electron Schr\"{o}dinger
+  equation for the interacting system. Few people have ever actually done this
+  (I'm one!).
+\end{itemize}
+There's a good book covering both of these by Martin, Reining, and
+Ceperley.\footfullcite{Martin2016}
+\end{frame}
+
+
+\begin{frame}{Results: Monolayers}
+
+\begin{table}[H]
+  \centering
+\begin{tabular}{lcccccc}
+\hline \hline
+& \multicolumn{2}{c}{$E_{\rm X^-}^{\rm b}$
+  (meV)} & \multicolumn{2}{c}{$E_{\rm
+    X^+}^{\rm b}$ (meV)} \\
+\raisebox{1.5ex}[0pt]{TMDC} & DMC&
+Exp. &
+DMC & Exp. \\ \hline
+
+MoS$_2$ & $35.0$ &
+$40$, $18.0(15)$, $43$
+& $34.9$ & \\
+
+MoSe$_2$ & $34.5$ &
+$30$ & $34.4$ &
+$30$ \\
+
+WS$_2$ & $33.5$ &
+$34$,$36$,
+$10$--$15$, $30$,
+$45$ & $33.6$ & & \\
+
+WSe$_2$ & $29.6$ &
+$30$ & $29.6$ &
+$30$, $24$ \\
+
+\hline \hline
+\end{tabular}
+\caption{Some trion binding energy results from our paper. Refs.\ and comparative results may be found
+therein.\footfullcite{biexpaper}}
+\label{tab:trion_results}
+\end{table}
+
+\begin{itemize}
+  \item We also enjoy good agreement with other theoretical studies, based on
+  DMC, PIMC, SVM, heavy-hole approx., and variational calculations.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Results: Monolayers II}
+
+\begin{itemize}
+  \item Another aspect of this paper was the study of higher
+  complexes. Surprisingly, we find that such systems are bound\ldots
+
+\begin{table}[H] \caption{Binding energies of BIG complexes in different
+TMDCs. Note: these aren't necessarily PL peak positions.
+\label{table:big_complexes}} \begin{center} \begin{tabular}{lccc} \hline
+\hline
+% peak position == de-excitonisation energies.
+
+ & \multicolumn{3}{c}{Binding energy (meV)} \\
+
+\raisebox{1.5ex}[0pt]{TMDC} & XX$^-\ (\rm eeehh)$ & D$^-$X ($\rm Deeeh$) & D$^0$XX
+($\rm Deeehh$) \\
+
+\hline
+
+MoS$_2$  & $58.6(6)$ & $84.4(4)$ & $61.6(6)$ \\
+
+MoSe$_2$ & $57.0(4)$ & $57.9(2)$ & $56.9(9)$ \\
+
+WS$_2$   & $57.4(3)$ & $59.2(4)$ & $58.2(6)$ \\
+
+WSe$_2$  & $52.5(7)$ & $51.3(4)$ & $51(1)$ \\
+
+\hline \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\item Biex.\ problem: Big things end up being called ``biexcitons''?
+
+\end{itemize}
+
+\end{frame}
+
+% }}*
+
+% *{{ Modelling heterostructures: multilayer interactions
+\begin{frame}{Heterostructures: multilayer interactions}
+\begin{itemize}
+  \begin{figure}[H]
+    \floatbox[{\capbeside\thisfloatsetup{capbesideposition={left, center},
+    capbesidewidth=0.5\textwidth}}]{figure}[\FBwidth]
+    {\caption{A tri-layer heterostructure of 2D semiconductors. There are $N$
+    layer potentials, and $N(N-1)/2$ inter-layer potentials.}\label{fig:multilayers}}
+    {\includegraphics[width=0.5\textwidth]{figs/multilayers.pdf}}
+  \end{figure}
+
+  \item Fourier components can be
+  determined,\footnote{Analytically, upto $N=4$. Possibly higher $N$ in
+  special cases, or, as always, with symmetry.} but
+  real-space potentials obtained numerically (Hankel transform).
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Bilayers of 2D semiconductors}
+How do charges interact in bilayers? More special functions?
+\begin{figure}[H]
+  \floatbox[{\capbeside\thisfloatsetup{capbesideposition={left, center},
+  capbesidewidth=0.5\textwidth}}]{figure}[\FBwidth]
+  {\caption{Exact inter-layer and intra-layer interaction potentials versus
+  distance. Parameters taken from an experimentally relevant MoSe$_2$/WSe$_2$
+  geometry.}\label{fig:interactions}}
+  {\includegraphics[width=0.45\textwidth]{figs/both_wse2mose2.eps}}
+\end{figure}
+
+\begin{itemize}
+  \item The screened interactions start to get a little cumbersome here:
+\end{itemize}
+\begin{equation}
+  v_{\text{intra}}({\bf q}) =
+  \frac{(1+r_{*j}q)\exp(qD)
+  -r_{*j}q\exp(-qD)}{2\bar{\epsilon}
+  q\left[(1+r_{*j}q)(1+r_{*i}q)\exp(qD)-
+  r_{*i}r_{*j}q^2\exp(-qD)\right]} \label{eq:intralayer_pot}
+\end{equation}
+\end{frame}
+
+\begin{frame}{A Quick Tangent}
+
+\begin{itemize}
+  \item The interactions are qualitatively similar to the (displaced) Coulomb
+  interactions. We expect similar physics to that in CQWs of III-Vs.
+
+
+\begin{figure}[H]
+  \floatbox[{\capbeside\thisfloatsetup{capbesideposition={left, center},
+  capbesidewidth=0.5\textwidth}}]{figure}[\FBwidth]
+  {\caption{Schematic of an indirect trion in a coupled quantum well.}\label{fig:trion_cqw}}
+  {\includegraphics[width=0.35\textwidth]{figs/trion_cqw.pdf}}
+\end{figure}
+
+  \item These were originally studied as the ``ideal testbed'' for finding BECs
+  of excitons. We've studied them before.~\footfullcite{trion_paper}
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Bilayers: cont.}
+
+\begin{itemize}
+  \item Our work with bilayers is ongoing, but we find that we are capable of
+  explaining at least one set of experimental results. [In fairness, many
+  relevant experimental results now exist].
+  \item We currently use an approximation to the bilayer interactions - but now
+  have access to the full solution to Poisson's equation (i.e.\ we can do a
+  little better?).
+  \item We've also managed to generalise this to the case of $N$-layers. We may
+  study higher heterostructures in future.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{What else can QMC do for us?}
+
+\begin{itemize} \item Could try to solve full many-body Schr\"{o}dinger
+equation? Is expensive. Failing that, {\bf is there anything useful QMC can do
+beyond calculate binding energies?}
+
+  \item In collaboration with Mark Danovich, David Ruiz-Tijerina, and Volodya
+  Fal'ko, we've\footnote{Myself, Neil Drummond and Marcin Szyniszewski.} used
+  QMC + pen-and-paper to form estimates of {\it lifetimes\/} in perturbation
+  theory.
+  \end{itemize}
+
+  \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{figs/lifetime.pdf}
+\label{fig:lifetime}
+  \end{figure}
+
+\end{frame}
+
+% }}*
+
+\begin{frame}{Future (relevant) Research Avenues}
+
+\begin{itemize}
+
+  \item Excited states of few-body complexes: some of these could
+  be bound, and (theoretically, I admit) show up in PL spectra. I'm interested in
+  using the Faddeev equations and/or QMC to try to study these
+  states.\footfullcite{Faddeev1961}
+
+  \item e-h droplets in TMDCs? There's been recent interest in
+  studying ``electron-hole droplets''.\footfullcite{Keldysh1986,Almand2014} These might show up in
+  TMDC bilayerss. I'd like to find out.\footnote{This requires ``Ewaldising''
+  the Keldysh interaction - i.e.\ making lattice sums of its $1/r$ component
+  absolutely convergent. I'm doing this as I write the presentation, ask me how
+  its going\ldots}
+
+  \item Possible multi-component electron gases in TMDCs? Requires periodic
+  Keldysh interaction.
+
+\end{itemize}
+\end{frame}
+
+% *{{ thanks!
+\begin{frame}[plain]
+\begin{center}
+  {\Huge Thank you all for listening!}
+\end{center}
+\end{frame}
+% }}*
+
+\end{document}
+

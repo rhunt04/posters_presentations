@@ -1,0 +1,207 @@
+\documentclass[hyperref={draft}]{beamer}
+\usepackage[size = a0, orientation = portrait, scale = 1.8]{beamerposter}
+
+% use my themes/colours
+\usetheme{Poster}
+\usecolortheme{Ryan_lancaster}
+
+% zigzagging line in tikz
+\usetikzlibrary{decorations.pathmorphing, patterns,shapes}
+
+% number figures as per usual
+\setbeamertemplate{caption}[numbered]
+
+% fonts and scaling
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{tikz, libertine, floatrow, caption, graphicx}
+\usepackage[scaled = 0.82]{inconsolata}
+\usepackage[libertine]{newtxmath}
+
+% command for emphasis + bra/kets
+\newcommand{\red}[1]{{\bf\color{red}{#1}}}
+\newcommand{\ket}[1]{\lvert {#1} \rangle}
+\newcommand{\bra}[1]{\langle {#1} \rvert}
+\newcommand{\expt}[1]{\langle {#1} \rangle}
+
+\title{\textit{Ab Initio} Modelling of Two- \\
+	   Dimensional Semiconductors \\
+	   \Large{\underline{\smash{Ryan Hunt}}$^1$, Neil Drummond$^1$ and Vladimir Fal'ko$^2$} 
+	   \\ \vspace{0.2cm} \normalsize{$^1$Department of Physics, Lancaster University\\ $^2$National Graphene Institute, University of Manchester}}
+\author[\large{$\langle$ Alternate : \texttt{ryan.hunt@postgrad.manchester.ac.uk} $\rangle$}]{\Large{Presenter e-mail : \framebox{\strut\ \texttt{r.hunt4@lancaster.ac.uk}\ }}}
+%\institute{\quad}
+
+% Footer logos (as per requirement...)
+\footimage{\centering\includegraphics[height=6.5cm]{figs/all_logos.png} \hspace{6cm} }
+\begin{document}
+
+% Images right and left of title
+\addtobeamertemplate{headline}{} 
+{ \begin{tikzpicture}[remember picture,overlay] 
+\node [shift={(-9 cm, -6.5 cm)}] at (current page.north east) {\includegraphics[width=15cm]{figs/nownano-logo.png}};
+\node [shift={( 9 cm, -6.5 cm)}] at (current page.north west) {\includegraphics[width=15cm]{figs/lan_logo.png}};
+\end{tikzpicture} }
+
+\begin{frame}[fragile]\centering
+
+\begin{columns}[T]
+\hfill
+% Main Left Column
+\begin{column}{.46\textwidth}
+
+\begin{block}{Introduction}
+\begin{itemize}
+\item Well-known, popular modelling approaches like Density Functional Theory (DFT) are often \red{inadequate} for the study of condensed matter systems.
+\item Quantum Monte Carlo (QMC) techniques are a family of alternative methods for the study of a wide variety of condensed matter systems [$1$], offering \red{systematic improvement} over other techniques.
+\end{itemize}
+\end{block}
+
+\begin{block}{Variational MC}
+\begin{itemize}
+\item Simplest of all QMC techniques, reliant on variational principle for the \red{trial many-e$^-$ wavefunction} $\ket{\Psi_{\alpha}}$:
+\begin{equation}
+	E(\alpha) = \dfrac{\bra{\Psi_{\alpha}} \mathcal{\hat H} \ket{\Psi_{\alpha}}}{\bra{\Psi_{\alpha}}\Psi_{\alpha} \rangle}
+	\geq E_0
+\end{equation}
+  \begin{description}
+  \item[$\alpha$] $\rightarrow$ variational parameters, chosen \red{specially}
+  \item[$\mathcal{\hat H}$] $\rightarrow$ many-e$^-$ Hamiltonian
+
+  \end{description}
+\item VMC used as prelude to Diffusion MC (DMC) studies. Cheaper to add \red{variational freedom} and exploit it \textit{before} using more computationally expensive DMC.
+\end{itemize}
+\end{block}
+
+\begin{block}{DMC - Biexcitons in Coupled QWs}
+\begin{itemize}
+\item Two 2DEGs, separated by $d$. Already realised in III-V bilayers, \textit{similar}$^{\dagger}$ physics seen in \red{truly} 2D heterostructures.
+\end{itemize}
+\begin{figure}[H]
+%	\centering
+	\includegraphics[width=0.65\textwidth, trim={0 0 0 0.9cm}, clip]{figs/cqw_biexc.pdf}
+	\caption{Schematic of biexciton formation in a CQW system. Inset: form of the biexciton trial wavefunction.}
+	\label{biexc_dmc}
+\end{figure}
+
+\vspace{1cm}
+\begin{itemize}
+\item DMC is a \red{projection} method, $\ket{\Psi}$ evolved in \emph{imaginary} time ($\tau=it$)
+\begin{equation}
+	\ket{\Psi(\tau)} = \sum^{\infty}_{i=0}c_i\ \mathrm{e}^{-(\epsilon_i - E_T)\tau}\ket{\Phi_i(0)}
+\end{equation}
+\item $e^-h^+$ \& $e^-h^+e^-h^+$ $\rightarrow$ \red{nodeless} model systems
+\end{itemize}
+\vspace{1cm}
+$^{\dagger}$ \red{Problem}: screening (like [$2$]) in realistic systems...
+
+\end{block}
+
+\end{column}
+\begin{column}{.04\textwidth}
+
+\begin{tikzpicture}
+\node[draw] at (0,   0) (A) {\scriptsize{$E_{DFT}$}};
+\node[draw] at (0, -49) (B) {\scriptsize{$E_{VMC}$}};
+\node[draw] at (0, -77) (C) {\scriptsize{$E_{DMC}$}};
+\node[draw] at (0, -81) (D) {\scriptsize{$E_{0}$}};
+\draw[black] (A.south) -- (A.south|-B.north);
+\draw[black] (B.south) -- (B.south|-C.north);
+%\draw[decoration = {zigzag,segment length = 6mm, amplitude = 3mm},decorate] (C.south) -- (D.south|-D.north);
+\draw[decoration = {snake, segment length = 6mm, amplitude = 3mm}, decorate] (C.south) -- (D.south|-D.north);
+\end{tikzpicture}
+
+\end{column}
+\hfill
+% Main Right Column
+
+
+\begin{column}{.46\textwidth}
+
+%\begin{block}{Example CQW Results}
+%\begin{itemize}
+%\item For given model parameters, it is possible to \red{highly} optimise $\ket{\Psi}$ in VMC, and run DMC simulations giving results like...
+%\begin{figure}[H]
+%	\floatbox[{\capbeside\thisfloatsetup{capbesideposition={left, center},capbesidewidth=0.4\textwidth}}]{figure}[\FBwidth]
+%	{\caption{Results taken during a DMC simulation for a biexciton with $\sigma=1$ and $d = 0.2$ au. Notice the (short!) equilibration period.}\label{fig:dmc_side}}
+%	{\includegraphics[width=0.6\textwidth]{figs/0_01au_data.pdf}}
+%\end{figure}
+%\item Highly accurate \red{binding energies}, pair-interaction potentials, etc... [$3$]
+%\end{itemize}
+%\end{block}
+
+\begin{block}{DMC - hBN energy gaps}
+\begin{itemize}
+\item QMC methods aren't just for toy problems
+\begin{figure}[H]
+
+	\centering
+	\includegraphics[width=0.75\textwidth]{figs/bhbn2.pdf}
+	\caption{An example (3 3 2) supercell used in our simulations. Blue atoms are B, Green are N. This sim. cell contains 144 e$^-$ (PPs!).}
+	\label{bhbn_332}
+
+\end{figure}
+
+\item \red{Goal:} Use QMC to calculate, from first-principles, the {\it\underline{excitonic}} and {\it quasiparticle} gaps of bulk hBN,
+
+\begin{equation}
+	\Delta^P_{Ex} = E^P_1(N) - E^P_0(N)
+\end{equation}
+
+\begin{figure}[H]
+	\floatbox[{\capbeside\thisfloatsetup{capbesideposition={left, center},capbesidewidth=0.3\textwidth}}]{figure}[\FBwidth]
+	{\caption{Example {\it monolayer} hBN DFT (PBE) bandstructure, labelled for explanation.}\label{fig:mhbn_pbe_labelled}}
+	{\includegraphics[width=0.7\textwidth]{figs/mhbn_pbe_labelled.pdf}}
+\end{figure}
+\item \red{Why?} $P \in \{ {K,M, \cdots} \} \implies$ can {\it accurately} determine gaps between arbitrary points in $\vec k$-space..
+
+\item \red{Progress?} Ask me for a real-time update!
+\begin{figure}[H]
+
+	\centering
+	\includegraphics[width=\textwidth]{figs/331_energies_first.pdf}
+	\caption{My first results, for g.s.e of the (3 3 1) supercell.}
+	\label{331_dmc_fist}
+
+\end{figure}
+\end{itemize}
+
+\end{block}
+
+\begin{block}{Acknowledgements}
+\begin{itemize}
+\item QMC calculations performed with the \texttt{CASINO} code [$4$].
+\item All calculations were performed on the \red{HEC} facility at Lancaster and the \red{N8 HPC}.
+\end{itemize}
+\end{block}
+\end{column}
+\end{columns}
+
+\begin{center}
+\begin{minipage}{0.993\textwidth}
+\begin{block}{References}
+\begin{columns}[T]
+
+% Left Column
+\begin{column}{.38\textwidth}
+\begin{enumerate}
+\item Foulkes, W.M.C. et al., \textit{RMP}, {\bf 73}, 33-83, (2001).
+\item Keldysh, L. V., \textit{JETP}, {\bf 29}, 658, (1979).
+\end{enumerate}
+\end{column}
+
+% Right Column
+\begin{column}{.55\textwidth}
+\begin{enumerate}
+\setcounter{enumi}{2}
+\item Lee, R. M. et al., \textit{PRB}, {\bf 79}, 125308, (2009).
+\item Needs, R. J. et al., \text{J. Phys. Cond. Mat.}, {\bf 22}, 0232011, (2009).
+\end{enumerate}
+\end{column}
+
+\end{columns}
+
+\end{block}
+\end{minipage}
+\end{center}
+\end{frame}
+\end{document}
